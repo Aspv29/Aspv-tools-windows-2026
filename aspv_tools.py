@@ -29,18 +29,28 @@ except ImportError:
 # ─────────────────────── ADMIN CHECK ───────────────────────
 
 def is_admin():
+    """Check if running with admin/root privileges."""
     try:
-        return ctypes.windll.shell32.IsUserAnAdmin()
+        if sys.platform == "win32":
+            return ctypes.windll.shell32.IsUserAnAdmin()
+        else:
+            # On Unix-like systems, check if running as root
+            return os.geteuid() == 0
     except Exception:
         return False
 
 def request_admin():
-    """Re-launch with admin privileges."""
+    """Re-launch with admin privileges (Windows only)."""
     if sys.platform == "win32" and not is_admin():
-        ctypes.windll.shell32.ShellExecuteW(
-            None, "runas", sys.executable, " ".join(sys.argv), None, 1
-        )
-        sys.exit()
+        try:
+            ctypes.windll.shell32.ShellExecuteW(
+                None, "runas", sys.executable, " ".join(sys.argv), None, 1
+            )
+            sys.exit()
+        except Exception as e:
+            print(f"Failed to request admin privileges: {e}")
+            return False
+    return True
 
 # ─────────────────────── COLORS & FONTS ────────────────────
 
@@ -1167,22 +1177,56 @@ class ASPVTools(tk.Tk):
 # ─────────────────────── ENTRY POINT ────────────────────────
 
 def main():
+    """Main entry point with platform checks."""
+    # Check if running on Windows
+    if sys.platform != "win32":
+        print("=" * 70)
+        print("⚠️  ADVERTENCIA: ASPV Tools está diseñado para Windows")
+        print("=" * 70)
+        print("Este programa requiere Windows para funcionar correctamente.")
+        print("Muchas funciones utilizan comandos específicos de Windows.")
+        print("\nSistema detectado:", platform.system(), platform.release())
+        print("\nEl programa se ejecutará en modo de demostración.")
+        print("Para funcionalidad completa, ejecuta en Windows 10/11.")
+        print("=" * 70)
+        print()
+        
+        # Ask user if they want to continue
+        try:
+            response = input("¿Deseas continuar de todos modos? (s/n): ").lower()
+            if response not in ['s', 'si', 'y', 'yes']:
+                print("Saliendo...")
+                sys.exit(0)
+        except (EOFError, KeyboardInterrupt):
+            print("\nSaliendo...")
+            sys.exit(0)
+    
     # On Windows, request admin if not already elevated
     if sys.platform == "win32":
         if not is_admin():
-            resp = ctypes.windll.user32.MessageBoxW(
-                0,
-                "ASPV Tools requiere privilegios de Administrador para todas sus funciones.\n\n"
-                "¿Deseas reiniciar como Administrador?",
-                "ASPV Tools - Privilegios Requeridos",
-                0x24  # MB_YESNO | MB_ICONQUESTION
-            )
-            if resp == 6:  # IDYES
-                request_admin()
+            try:
+                resp = ctypes.windll.user32.MessageBoxW(
+                    0,
+                    "ASPV Tools requiere privilegios de Administrador para todas sus funciones.\n\n"
+                    "¿Deseas reiniciar como Administrador?",
+                    "ASPV Tools - Privilegios Requeridos",
+                    0x24  # MB_YESNO | MB_ICONQUESTION
+                )
+                if resp == 6:  # IDYES
+                    request_admin()
+            except Exception as e:
+                print(f"No se pudo solicitar privilegios de administrador: {e}")
             # Continue without admin if user says No
 
-    app = ASPVTools()
-    app.mainloop()
+    try:
+        app = ASPVTools()
+        app.mainloop()
+    except Exception as e:
+        print(f"\n❌ Error al iniciar la aplicación: {e}")
+        print(f"Tipo de error: {type(e).__name__}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
 
 
 if __name__ == "__main__":
