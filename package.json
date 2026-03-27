@@ -1,0 +1,78 @@
+{
+  "name": "aspv-tools-premium",
+  "version": "3.0.0",
+  "description": "ASPV Tools Premium - Complete Windows System Administration & Development Toolkit",
+  "main": "src/main.js",
+  "author": "ASPV Tools Team",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder --win",
+    "build:dir": "electron-builder --win --dir",
+    "pack": "electron-builder --win portable",
+    "dist": "electron-builder --win nsis",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "build": {
+    "appId": "com.aspvtools.premium",
+    "productName": "ASPV Tools Premium",
+    "copyright": "Copyright © 2026 ASPV Tools Team",
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "assets/icon.ico",
+      "requestedExecutionLevel": "requireAdministrator"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "installerHeaderIcon": "assets/icon.ico",
+      "shortcutName": "ASPV Tools Premium",
+      "include": "installer/nsis-config.nsh"
+    },
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "tools/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "tools/",
+        "to": "tools/",
+        "filter": ["**/*"]
+      }
+    ],
+    "directories": {
+      "output": "dist",
+      "buildResources": "assets"
+    }
+  },
+  "dependencies": {
+    "electron-store": "^8.1.0",
+    "sudo-prompt": "^9.2.1",
+    "node-disk-info": "^1.3.0",
+    "usb-detection": "^4.14.1",
+    "archiver": "^6.0.1",
+    "extract-zip": "^2.0.1",
+    "got": "^11.8.6",
+    "progress-stream": "^2.0.0",
+    "systeminformation": "^5.21.0"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  }
+}
