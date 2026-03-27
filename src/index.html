@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ASPV Tools Premium v3.0</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Custom Title Bar -->
+  <div class="titlebar">
+    <div class="titlebar-drag">
+      <div class="titlebar-icon">⚡</div>
+      <div class="titlebar-title">ASPV Tools Premium v3.0</div>
+    </div>
+    <div class="titlebar-controls">
+      <button class="titlebar-btn" id="minimize-btn" title="Minimizar">
+        <svg width="12" height="12" viewBox="0 0 12 12"><path d="M0 6h12" stroke="currentColor" stroke-width="1"/></svg>
+      </button>
+      <button class="titlebar-btn" id="maximize-btn" title="Maximizar">
+        <svg width="12" height="12" viewBox="0 0 12 12"><rect x="1" y="1" width="10" height="10" stroke="currentColor" stroke-width="1" fill="none"/></svg>
+      </button>
+      <button class="titlebar-btn close" id="close-btn" title="Cerrar">
+        <svg width="12" height="12" viewBox="0 0 12 12"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="main-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2>NAVEGACIÓN</h2>
+      </div>
+      <nav class="sidebar-nav" id="sidebar-nav">
+        <!-- Navigation items will be dynamically generated -->
+      </nav>
+      <div class="sidebar-footer">
+        <div class="admin-badge" id="admin-badge">
+          <span class="badge-icon">○</span>
+          <span class="badge-text">Sin Admin</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Content Area -->
+    <main class="content">
+      <!-- Content Header -->
+      <div class="content-header" id="content-header">
+        <h1 class="content-title" id="content-title">Dashboard</h1>
+        <p class="content-subtitle" id="content-subtitle">Suite completa de administración del sistema</p>
+      </div>
+
+      <!-- Content Body -->
+      <div class="content-body" id="content-body">
+        <!-- Dynamic content will be loaded here -->
+      </div>
+
+      <!-- Terminal Output -->
+      <div class="terminal-container">
+        <div class="terminal-header">
+          <span class="terminal-title">📟 Terminal de Salida</span>
+          <div class="terminal-controls">
+            <button class="terminal-btn" id="clear-terminal" title="Limpiar">🗑️</button>
+            <button class="terminal-btn" id="copy-terminal" title="Copiar">📋</button>
+          </div>
+        </div>
+        <div class="terminal-output" id="terminal-output">
+          <div class="terminal-line welcome">ASPV Tools Premium v3.0 - Listo para ejecutar comandos</div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Status Bar -->
+  <div class="statusbar">
+    <div class="statusbar-left">
+      <span id="status-text">Listo</span>
+    </div>
+    <div class="statusbar-right">
+      <span id="system-info">Cargando información del sistema...</span>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loading-overlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Ejecutando comando...</div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="renderer.js"></script>
+</body>
+</html>
