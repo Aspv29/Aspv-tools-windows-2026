@@ -3,93 +3,391 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ASPV Tools Premium v3.0</title>
+  <title>Mvps Hacking Mods</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- Custom Title Bar -->
-  <div class="titlebar">
-    <div class="titlebar-drag">
-      <div class="titlebar-icon">⚡</div>
-      <div class="titlebar-title">ASPV Tools Premium v3.0</div>
-    </div>
-    <div class="titlebar-controls">
-      <button class="titlebar-btn" id="minimize-btn" title="Minimizar">
-        <svg width="12" height="12" viewBox="0 0 12 12"><path d="M0 6h12" stroke="currentColor" stroke-width="1"/></svg>
-      </button>
-      <button class="titlebar-btn" id="maximize-btn" title="Maximizar">
-        <svg width="12" height="12" viewBox="0 0 12 12"><rect x="1" y="1" width="10" height="10" stroke="currentColor" stroke-width="1" fill="none"/></svg>
-      </button>
-      <button class="titlebar-btn close" id="close-btn" title="Cerrar">
-        <svg width="12" height="12" viewBox="0 0 12 12"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1"/></svg>
-      </button>
-    </div>
-  </div>
+  <!-- Matrix Rain Canvas Background -->
+  <canvas id="matrixCanvas"></canvas>
 
-  <!-- Main Container -->
-  <div class="main-container">
-    <!-- Sidebar Navigation -->
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <h2>NAVEGACIÓN</h2>
-      </div>
-      <nav class="sidebar-nav" id="sidebar-nav">
-        <!-- Navigation items will be dynamically generated -->
-      </nav>
-      <div class="sidebar-footer">
-        <div class="admin-badge" id="admin-badge">
-          <span class="badge-icon">○</span>
-          <span class="badge-text">Sin Admin</span>
+  <!-- Scanline Overlay -->
+  <div class="scanline-overlay"></div>
+
+  <!-- Main App -->
+  <div class="app-wrapper">
+    <!-- Header -->
+    <header class="hacker-header">
+      <div class="header-left">
+        <div class="skull-icon">
+          <svg viewBox="0 0 64 64" width="42" height="42">
+            <path d="M32 4C18 4 8 16 8 28c0 8 4 15 10 19v9c0 2 2 4 4 4h20c2 0 4-2 4-4v-9c6-4 10-11 10-19C56 16 46 4 32 4z" fill="none" stroke="#00ff41" stroke-width="2.5"/>
+            <circle cx="24" cy="26" r="5" fill="#00ff41"/>
+            <circle cx="40" cy="26" r="5" fill="#00ff41"/>
+            <path d="M26 38h12" stroke="#00ff41" stroke-width="2" stroke-linecap="round"/>
+            <path d="M28 38v4M32 38v4M36 38v4" stroke="#00ff41" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <div class="header-title-group">
+          <h1 class="glitch-title" data-text="Mvps Hacking Mods">Mvps Hacking Mods</h1>
+          <p class="header-subtitle typing-effect">ESP32-S3 Firmware Flasher // LILYGO T-Embed // Web Serial OTG</p>
         </div>
       </div>
-    </aside>
-
-    <!-- Content Area -->
-    <main class="content">
-      <!-- Content Header -->
-      <div class="content-header" id="content-header">
-        <h1 class="content-title" id="content-title">Dashboard</h1>
-        <p class="content-subtitle" id="content-subtitle">Suite completa de administración del sistema</p>
+      <div class="header-right">
+        <div class="connection-status" id="connectionStatus">
+          <span class="status-dot disconnected"></span>
+          <span class="status-text">DISCONNECTED</span>
+        </div>
+        <button class="btn-hacker btn-connect" id="btnConnect" onclick="connectDevice()">
+          <span class="btn-icon">&#9889;</span> CONNECT DEVICE
+        </button>
       </div>
+    </header>
 
-      <!-- Content Body -->
-      <div class="content-body" id="content-body">
-        <!-- Dynamic content will be loaded here -->
+    <!-- Terminal Log Bar -->
+    <div class="terminal-bar" id="terminalBar">
+      <div class="terminal-bar-header">
+        <span class="terminal-prompt">[root@mvps-hacking]#</span>
+        <span class="terminal-status" id="terminalStatus">System ready...</span>
+        <button class="btn-mini" onclick="toggleTerminal()">_</button>
       </div>
+      <div class="terminal-log" id="terminalLog">
+        <div class="log-line log-system">[SYSTEM] Mvps Hacking Mods v2.0 initialized</div>
+        <div class="log-line log-info">[INFO] Web Serial API available: <span id="serialSupport">checking...</span></div>
+        <div class="log-line log-info">[INFO] Awaiting device connection via USB OTG...</div>
+      </div>
+    </div>
 
-      <!-- Terminal Output -->
-      <div class="terminal-container">
-        <div class="terminal-header">
-          <span class="terminal-title">📟 Terminal de Salida</span>
-          <div class="terminal-controls">
-            <button class="terminal-btn" id="clear-terminal" title="Limpiar">🗑️</button>
-            <button class="terminal-btn" id="copy-terminal" title="Copiar">📋</button>
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Sidebar -->
+      <aside class="sidebar-hack">
+        <div class="sidebar-section">
+          <h3 class="sidebar-title">> NAVIGATION</h3>
+          <nav class="nav-hack">
+            <button class="nav-btn active" data-section="device" onclick="showSection('device')">
+              <span class="nav-icon">&#9881;</span> Device Manager
+            </button>
+            <button class="nav-btn" data-section="firmware" onclick="showSection('firmware')">
+              <span class="nav-icon">&#9000;</span> Firmware Catalog
+            </button>
+            <button class="nav-btn" data-section="flash" onclick="showSection('flash')">
+              <span class="nav-icon">&#9889;</span> Flash Tool
+            </button>
+            <button class="nav-btn" data-section="tools" onclick="showSection('tools')">
+              <span class="nav-icon">&#9874;</span> Hacking Tools
+            </button>
+          </nav>
+        </div>
+        <div class="sidebar-section">
+          <h3 class="sidebar-title">> DEVICE INFO</h3>
+          <div class="device-info-panel" id="deviceInfoPanel">
+            <div class="info-row-hack">
+              <span class="info-label-hack">Board:</span>
+              <span class="info-value-hack" id="devBoard">---</span>
+            </div>
+            <div class="info-row-hack">
+              <span class="info-label-hack">Chip:</span>
+              <span class="info-value-hack" id="devChip">---</span>
+            </div>
+            <div class="info-row-hack">
+              <span class="info-label-hack">Flash:</span>
+              <span class="info-value-hack" id="devFlash">---</span>
+            </div>
+            <div class="info-row-hack">
+              <span class="info-label-hack">MAC:</span>
+              <span class="info-value-hack" id="devMac">---</span>
+            </div>
+            <div class="info-row-hack">
+              <span class="info-label-hack">Port:</span>
+              <span class="info-value-hack" id="devPort">---</span>
+            </div>
           </div>
         </div>
-        <div class="terminal-output" id="terminal-output">
-          <div class="terminal-line welcome">ASPV Tools Premium v3.0 - Listo para ejecutar comandos</div>
+        <div class="sidebar-section">
+          <h3 class="sidebar-title">> STATS</h3>
+          <div class="stats-panel">
+            <div class="stat-item">
+              <span class="stat-value" id="statFirmwares">24</span>
+              <span class="stat-label">Firmwares</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value" id="statFlashed">0</span>
+              <span class="stat-label">Flashed</span>
+            </div>
+          </div>
         </div>
+      </aside>
+
+      <!-- Content Area -->
+      <main class="content-hack">
+        <!-- Section: Device Manager -->
+        <section class="section-panel active" id="section-device">
+          <div class="section-header-hack">
+            <h2 class="section-title-hack">> DEVICE MANAGER</h2>
+            <span class="section-badge">USB OTG / Web Serial</span>
+          </div>
+          <div class="device-cards">
+            <div class="device-card">
+              <div class="device-card-icon">
+                <svg viewBox="0 0 48 48" width="48" height="48">
+                  <rect x="8" y="4" width="32" height="40" rx="4" fill="none" stroke="#00ff41" stroke-width="2"/>
+                  <rect x="14" y="10" width="20" height="14" rx="2" fill="none" stroke="#00ff41" stroke-width="1.5"/>
+                  <circle cx="24" cy="32" r="3" fill="none" stroke="#00ff41" stroke-width="1.5"/>
+                  <line x1="20" y1="44" x2="28" y2="44" stroke="#00ff41" stroke-width="2"/>
+                </svg>
+              </div>
+              <h3>LILYGO T-Embed ESP32-S3</h3>
+              <p>1.9" ST7789 LCD | Rotary Encoder | 16MB Flash | WiFi + BLE</p>
+              <div class="device-specs">
+                <span class="spec-tag">ESP32-S3</span>
+                <span class="spec-tag">16MB</span>
+                <span class="spec-tag">WiFi</span>
+                <span class="spec-tag">BLE 5.0</span>
+                <span class="spec-tag">OTG</span>
+              </div>
+              <button class="btn-hacker btn-detect" onclick="detectDevice()">
+                <span class="btn-icon">&#128269;</span> DETECT DEVICE
+              </button>
+            </div>
+            <div class="device-card">
+              <div class="device-card-icon">
+                <svg viewBox="0 0 48 48" width="48" height="48">
+                  <path d="M12 8h24v32H12z" fill="none" stroke="#00ff41" stroke-width="2"/>
+                  <path d="M18 4v4M30 4v4M18 40v4M30 40v4" stroke="#00ff41" stroke-width="2"/>
+                  <circle cx="24" cy="20" r="6" fill="none" stroke="#00ff41" stroke-width="1.5"/>
+                  <path d="M16 30h16" stroke="#00ff41" stroke-width="1.5"/>
+                </svg>
+              </div>
+              <h3>USB OTG Connection</h3>
+              <p>Connect your phone directly to ESP32-S3 via USB OTG cable for flashing</p>
+              <div class="device-specs">
+                <span class="spec-tag">USB-C</span>
+                <span class="spec-tag">OTG</span>
+                <span class="spec-tag">115200 baud</span>
+              </div>
+              <button class="btn-hacker" onclick="connectDevice()">
+                <span class="btn-icon">&#9889;</span> CONNECT USB
+              </button>
+            </div>
+          </div>
+          <div class="serial-monitor card-hack" id="serialMonitor">
+            <div class="card-hack-header">
+              <span>> SERIAL MONITOR</span>
+              <div class="monitor-controls">
+                <select id="baudRate" class="select-hack">
+                  <option value="9600">9600</option>
+                  <option value="115200" selected>115200</option>
+                  <option value="230400">230400</option>
+                  <option value="460800">460800</option>
+                  <option value="921600">921600</option>
+                </select>
+                <button class="btn-mini" onclick="clearSerialMonitor()">CLEAR</button>
+              </div>
+            </div>
+            <div class="serial-output" id="serialOutput">
+              <div class="serial-line">Waiting for serial connection...</div>
+            </div>
+            <div class="serial-input-row">
+              <input type="text" id="serialInput" class="input-hack" placeholder="Send command..." onkeypress="if(event.key==='Enter')sendSerialCommand()">
+              <button class="btn-hacker btn-sm" onclick="sendSerialCommand()">SEND</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section: Firmware Catalog -->
+        <section class="section-panel" id="section-firmware">
+          <div class="section-header-hack">
+            <h2 class="section-title-hack">> FIRMWARE CATALOG</h2>
+            <span class="section-badge">LILYGO T-Embed ESP32-S3</span>
+          </div>
+          <div class="firmware-filters">
+            <button class="filter-btn active" onclick="filterFirmware('all')">ALL</button>
+            <button class="filter-btn" onclick="filterFirmware('premium')">PREMIUM</button>
+            <button class="filter-btn" onclick="filterFirmware('wifi')">WiFi</button>
+            <button class="filter-btn" onclick="filterFirmware('ble')">BLE</button>
+            <button class="filter-btn" onclick="filterFirmware('hacking')">HACKING</button>
+            <button class="filter-btn" onclick="filterFirmware('utility')">UTILITY</button>
+          </div>
+          <div class="firmware-grid" id="firmwareGrid">
+            <!-- Firmware cards are injected by JS -->
+          </div>
+        </section>
+
+        <!-- Section: Flash Tool -->
+        <section class="section-panel" id="section-flash">
+          <div class="section-header-hack">
+            <h2 class="section-title-hack">> FLASH TOOL</h2>
+            <span class="section-badge">ESP32-S3 Flasher</span>
+          </div>
+          <div class="flash-panel">
+            <div class="flash-step">
+              <div class="step-number">01</div>
+              <div class="step-content">
+                <h3>Select Firmware</h3>
+                <p>Choose from catalog or upload custom .bin file</p>
+                <div class="flash-file-row">
+                  <span class="flash-file-name" id="flashFileName">No firmware selected</span>
+                  <button class="btn-hacker btn-sm" onclick="selectFirmwareForFlash()">BROWSE</button>
+                  <input type="file" id="firmwareFileInput" accept=".bin,.hex" style="display:none" onchange="handleFirmwareFile(event)">
+                </div>
+              </div>
+            </div>
+            <div class="flash-step">
+              <div class="step-number">02</div>
+              <div class="step-content">
+                <h3>Connect Device</h3>
+                <p>Ensure ESP32-S3 is in download mode (hold BOOT + press RESET)</p>
+                <div class="connection-indicator" id="flashConnIndicator">
+                  <span class="indicator-dot"></span>
+                  <span id="flashConnText">Not Connected</span>
+                </div>
+              </div>
+            </div>
+            <div class="flash-step">
+              <div class="step-number">03</div>
+              <div class="step-content">
+                <h3>Flash Configuration</h3>
+                <div class="flash-config">
+                  <div class="config-row">
+                    <label>Flash Offset:</label>
+                    <select id="flashOffset" class="select-hack">
+                      <option value="0x0000">0x0000 (Bootloader)</option>
+                      <option value="0x1000">0x1000 (Standard)</option>
+                      <option value="0x8000">0x8000 (Partition Table)</option>
+                      <option value="0x10000" selected>0x10000 (Application)</option>
+                    </select>
+                  </div>
+                  <div class="config-row">
+                    <label>Flash Mode:</label>
+                    <select id="flashMode" class="select-hack">
+                      <option value="dio" selected>DIO</option>
+                      <option value="qio">QIO</option>
+                      <option value="dout">DOUT</option>
+                    </select>
+                  </div>
+                  <div class="config-row">
+                    <label>Baud Rate:</label>
+                    <select id="flashBaud" class="select-hack">
+                      <option value="115200">115200</option>
+                      <option value="230400">230400</option>
+                      <option value="460800" selected>460800</option>
+                      <option value="921600">921600</option>
+                    </select>
+                  </div>
+                  <div class="config-row">
+                    <label>Erase Flash:</label>
+                    <label class="toggle-hack">
+                      <input type="checkbox" id="eraseFlash">
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="flash-step">
+              <div class="step-number">04</div>
+              <div class="step-content">
+                <h3>Flash Firmware</h3>
+                <div class="progress-container" id="flashProgress" style="display:none;">
+                  <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                  </div>
+                  <span class="progress-text" id="progressText">0%</span>
+                </div>
+                <button class="btn-hacker btn-flash" id="btnFlash" onclick="startFlashing()">
+                  <span class="btn-icon">&#9889;</span> START FLASHING
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="flash-log card-hack">
+            <div class="card-hack-header">
+              <span>> FLASH LOG</span>
+              <button class="btn-mini" onclick="clearFlashLog()">CLEAR</button>
+            </div>
+            <div class="flash-log-output" id="flashLogOutput">
+              <div class="log-line log-system">[FLASHER] Ready. Select firmware and connect device to begin.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section: Hacking Tools -->
+        <section class="section-panel" id="section-tools">
+          <div class="section-header-hack">
+            <h2 class="section-title-hack">> HACKING TOOLS</h2>
+            <span class="section-badge">ESP32-S3 Utilities</span>
+          </div>
+          <div class="tools-grid">
+            <div class="tool-card" onclick="runTool('wifi-scan')">
+              <div class="tool-icon">&#128225;</div>
+              <h3>WiFi Scanner</h3>
+              <p>Scan and analyze nearby WiFi networks, channels, signal strength</p>
+              <span class="tool-tag">WiFi</span>
+            </div>
+            <div class="tool-card" onclick="runTool('ble-scan')">
+              <div class="tool-icon">&#128246;</div>
+              <h3>BLE Scanner</h3>
+              <p>Discover Bluetooth Low Energy devices and services</p>
+              <span class="tool-tag">BLE</span>
+            </div>
+            <div class="tool-card" onclick="runTool('deauth')">
+              <div class="tool-icon">&#9888;</div>
+              <h3>Deauth Detector</h3>
+              <p>Monitor for deauthentication attacks on your network</p>
+              <span class="tool-tag">Security</span>
+            </div>
+            <div class="tool-card" onclick="runTool('packet')">
+              <div class="tool-icon">&#128230;</div>
+              <h3>Packet Monitor</h3>
+              <p>Capture and analyze WiFi packets in real-time</p>
+              <span class="tool-tag">WiFi</span>
+            </div>
+            <div class="tool-card" onclick="runTool('ir-tx')">
+              <div class="tool-icon">&#128161;</div>
+              <h3>IR Transmitter</h3>
+              <p>Send IR signals to control devices (TV, AC, etc)</p>
+              <span class="tool-tag">IR</span>
+            </div>
+            <div class="tool-card" onclick="runTool('badusb')">
+              <div class="tool-icon">&#128187;</div>
+              <h3>BadUSB Payload</h3>
+              <p>Deploy keyboard injection scripts for pentesting</p>
+              <span class="tool-tag premium-tag">PREMIUM</span>
+            </div>
+            <div class="tool-card" onclick="runTool('nfc')">
+              <div class="tool-icon">&#128179;</div>
+              <h3>NFC Tools</h3>
+              <p>Read, write and emulate NFC tags and cards</p>
+              <span class="tool-tag">NFC</span>
+            </div>
+            <div class="tool-card" onclick="runTool('gps')">
+              <div class="tool-icon">&#127759;</div>
+              <h3>GPS Spoofer</h3>
+              <p>GPS signal testing and location simulation tool</p>
+              <span class="tool-tag premium-tag">PREMIUM</span>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="hacker-footer">
+      <div class="footer-left">
+        <span class="footer-text">[Mvps Hacking Mods v2.0]</span>
+        <span class="footer-separator">|</span>
+        <span class="footer-text" id="footerTime">00:00:00</span>
       </div>
-    </main>
+      <div class="footer-right">
+        <span class="footer-text">Web Serial API</span>
+        <span class="footer-separator">|</span>
+        <span class="footer-text">ESP32-S3</span>
+        <span class="footer-separator">|</span>
+        <span class="footer-text blink-text">SYSTEM ACTIVE</span>
+      </div>
+    </footer>
   </div>
 
-  <!-- Status Bar -->
-  <div class="statusbar">
-    <div class="statusbar-left">
-      <span id="status-text">Listo</span>
-    </div>
-    <div class="statusbar-right">
-      <span id="system-info">Cargando información del sistema...</span>
-    </div>
-  </div>
-
-  <!-- Loading Overlay -->
-  <div class="loading-overlay" id="loading-overlay">
-    <div class="loading-spinner"></div>
-    <div class="loading-text">Ejecutando comando...</div>
-  </div>
-
-  <!-- Scripts -->
   <script src="renderer.js"></script>
 </body>
 </html>
