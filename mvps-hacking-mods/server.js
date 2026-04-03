@@ -13,6 +13,11 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// Top rated firmware page
+app.get('/top-rated', (req, res) => {
+    res.sendFile(path.join(__dirname, 'top-rated.html'));
+});
+
 // API endpoint for firmware list
 app.get('/api/firmware', (req, res) => {
     res.json({
