@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mvps Hacking mods</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        #matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.15;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            border: 2px solid #00ff00;
+            background: rgba(0, 20, 0, 0.8);
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 0, 0.2), transparent);
+            animation: scan 3s linear infinite;
+        }
+
+        @keyframes scan {
+            100% { left: 100%; }
+        }
+
+        .glitch {
+            font-size: 3em;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 40px #00ff00;
+            animation: glitch 1s infinite;
+            position: relative;
+        }
+
+        @keyframes glitch {
+            0%, 90%, 100% { text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00; }
+            92% { text-shadow: -2px 0 #ff0000, 2px 0 #00ffff; transform: translate(2px, 0); }
+            94% { text-shadow: 2px 0 #ff0000, -2px 0 #00ffff; transform: translate(-2px, 0); }
+            96% { text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00; transform: translate(0, 0); }
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            color: #00cc00;
+            margin-top: 10px;
+            letter-spacing: 3px;
+        }
+
+        .terminal-bar {
+            background: #001100;
+            padding: 10px 20px;
+            border: 1px solid #00ff00;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .terminal-dot.red { background: #ff5f56; }
+        .terminal-dot.yellow { background: #ffbd2e; }
+        .terminal-dot.green { background: #27ca40; }
+
+        .terminal-title {
+            margin-left: 20px;
+            color: #00ff00;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: rgba(0, 20, 0, 0.9);
+            border: 1px solid #00ff00;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .panel-header {
+            font-size: 1.3em;
+            color: #00ff00;
+            border-bottom: 1px solid #00ff00;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .panel-header::before {
+            content: '>';
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        .device-status {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: #001100;
+            border: 1px solid #00ff00;
+            margin-bottom: 15px;
+        }
+
+        .status-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #333;
+            transition: all 0.3s;
+        }
+
+        .status-indicator.connected {
+            background: #00ff00;
+            box-shadow: 0 0 10px #00ff00;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 10px #00ff00; }
+            50% { box-shadow: 0 0 20px #00ff00, 0 0 30px #00ff00; }
+        }
+
+        .btn {
+            background: transparent;
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            padding: 12px 25px;
+            font-family: 'Courier New', monospace;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            background: #00ff00;
+            color: #000;
+            box-shadow: 0 0 20px #00ff00;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn.premium {
+            border-color: #ffd700;
+            color: #ffd700;
+        }
+
+        .btn.premium:hover {
+            background: #ffd700;
+            color: #000;
+            box-shadow: 0 0 20px #ffd700;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn:disabled:hover {
+            background: transparent;
+            color: #00ff00;
+            box-shadow: none;
+        }
+
+        .firmware-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .firmware-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .firmware-list::-webkit-scrollbar-track {
+            background: #001100;
+        }
+
+        .firmware-list::-webkit-scrollbar-thumb {
+            background: #00ff00;
+        }
+
+        .firmware-item {
+            background: #001100;
+            border: 1px solid #00aa00;
+            padding: 15px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .firmware-item:hover {
+            border-color: #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+
+        .firmware-item.premium {
+            border-color: #ffd700;
+            background: linear-gradient(135deg, #001100 0%, #1a1a00 100%);
+        }
+
+        .firmware-item.premium::before {
+            content: '★ PREMIUM';
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            color: #ffd700;
+            font-size: 0.7em;
+            animation: glow 2s infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 5px #ffd700; }
+            50% { text-shadow: 0 0 15px #ffd700, 0 0 25px #ffd700; }
+        }
+
+        .firmware-name {
+            font-size: 1.1em;
+            color: #00ff00;
+            margin-bottom: 5px;
+        }
+
+        .firmware-desc {
+            font-size: 0.85em;
+            color: #00aa00;
+            margin-bottom: 10px;
+        }
+
+        .firmware-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .firmware-size {
+            color: #007700;
+            font-size: 0.8em;
+        }
+
+        .firmware-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .terminal-output {
+            background: #000;
+            border: 1px solid #00ff00;
+            padding: 15px;
+            height: 300px;
+            overflow-y: auto;
+            font-size: 0.9em;
+            margin-top: 15px;
+        }
+
+        .terminal-output::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .terminal-output::-webkit-scrollbar-track {
+            background: #000;
+        }
+
+        .terminal-output::-webkit-scrollbar-thumb {
+            background: #00ff00;
+        }
+
+        .log-line {
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+
+        .log-line.success { color: #00ff00; }
+        .log-line.error { color: #ff4444; }
+        .log-line.warning { color: #ffaa00; }
+        .log-line.info { color: #00aaff; }
+
+        .progress-bar {
+            width: 100%;
+            height: 25px;
+            background: #001100;
+            border: 1px solid #00ff00;
+            margin-top: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #003300, #00ff00);
+            width: 0%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: #001100;
+            border: 1px solid #00aa00;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        .stat-label {
+            font-size: 0.8em;
+            color: #00aa00;
+            margin-top: 5px;
+        }
+
+        .type-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            font-size: 0.7em;
+            border-radius: 3px;
+            margin-right: 5px;
+        }
+
+        .type-badge.wifi { background: #00aaff; color: #000; }
+        .type-badge.bluetooth { background: #0088ff; color: #fff; }
+        .type-badge.custom { background: #ff6600; color: #000; }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 30px;
+            border-top: 1px solid #00aa00;
+            color: #007700;
+            font-size: 0.9em;
+        }
+
+        .ascii-art {
+            font-size: 0.6em;
+            line-height: 1;
+            white-space: pre;
+            color: #007700;
+            margin: 10px 0;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-drop-zone {
+            border: 2px dashed #00aa00;
+            padding: 30px;
+            text-align: center;
+            margin-top: 15px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .file-drop-zone:hover, .file-drop-zone.dragover {
+            border-color: #00ff00;
+            background: rgba(0, 255, 0, 0.1);
+        }
+
+        .hidden { display: none !important; }
+
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        .typing-effect {
+            overflow: hidden;
+            white-space: nowrap;
+            animation: typing 2s steps(40, end);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+    
+    <div class="container">
+        <header class="header">
+            <div class="ascii-art">
+   _  _ _   _ ____ ____ _  _ 
+   |\\ | |___| |__| |__/ |\\ | 
+   | \\| |   | |  | |  \\ | \\| 
+   _________________________
+    </div>
+            <h1 class="glitch">Mvps Hacking mods</h1>
+            <p class="subtitle">[ ESP32-S3 Firmware Flasher ]</p>
+        </header>
+
+        <div class="terminal-bar">
+            <div class="terminal-dot red"></div>
+            <div class="terminal-dot yellow"></div>
+            <div class="terminal-dot green"></div>
+            <span class="terminal-title">SYSTEM://CONNECTION_TERMINAL</span>
+        </div>
+
+        <div class="main-grid">
+            <div class="left-column">
+                <div class="panel">
+                    <div class="panel-header">Device Connection (OTG/USB)</div>
+                    
+                    <div class="device-status">
+                        <div id="statusIndicator" class="status-indicator"></div>
+                        <div>
+                            <div id="deviceStatus">No device connected</div>
+                            <div id="deviceInfo" style="font-size: 0.8em; color: #007700;"></div>
+                        </div>
+                    </div>
+
+                    <button id="connectBtn" class="btn" style="width: 100%; margin-bottom: 15px;">
+                        [ Connect Device ]
+                    </button>
+
+                    <div id="devicePanel" class="hidden">
+                        <button id="disconnectBtn" class="btn" style="width: 100%; margin-bottom: 15px; border-color: #ff4444; color: #ff4444;">
+                            [ Disconnect ]
+                        </button>
+                        
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="stat-value" id="flashSize">-</div>
+                                <div class="stat-label">Flash Size</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value" id="partition">-</div>
+                                <div class="stat-label">Partition</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value" id="chipModel">-</div>
+                                <div class="stat-label">Chip</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="file-drop-zone" id="dropZone">
+                        <p>[ Drop custom firmware .bin file here ]</p>
+                        <p style="font-size: 0.8em; color: #007700;">or click to browse</p>
+                        <input type="file" id="customFirmware" accept=".bin">
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">Flash Progress</div>
+                    <div id="terminal" class="terminal-output">
+                        <div class="log-line info">> System initialized...</div>
+                        <div class="log-line info">> Waiting for device connection...</div>
+                    </div>
+                    <div class="progress-bar hidden" id="progressBar">
+                        <div class="progress-fill" id="progressFill">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-column">
+                <div class="panel">
+                    <div class="panel-header">Firmware Database</div>
+                    <div class="firmware-list" id="firmwareList">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>Mvps Hacking mods v2.0 | ESP32-S3 Universal Flasher</p>
+            <p style="margin-top: 5px;">[ Web Serial API Enabled ] | [ Chrome/Edge Required ]</p>
+        </footer>
+    </div>
+
+    <script>
+        const firmwares = [
+            {
+                id: 1,
+                name: "WiFi Deauther ESP32",
+                description: "802.11 deauthentication attacks with beacon flooding",
+                size: "1.2 MB",
+                type: "wifi",
+                premium: false,
+                version: "3.0.1",
+                url: "https://github.com/SpacehuhnTech/esp32_deauther/releases/latest/download/deauther_esp32c3.bin"
+            },
+            {
+                id: 2,
+                name: "BlueTooth Spoofer",
+                description: "BLE device spoofing and tracking module",
+                size: "892 KB",
+                type: "bluetooth",
+                premium: false,
+                version: "2.1.0",
+                url: "https://github.com/SandboxCTF/BLE_Faker/releases/latest/download/ble_spoofer.bin"
+            },
+            {
+                id: 3,
+                name: "ESP32 Midi Controller",
+                description: "Custom HID MIDI controller with macro support",
+                size: "756 KB",
+                type: "custom",
+                premium: false,
+                version: "1.5.2",
+                url: "https://github.com/ESP32-MIDI/Controller/releases/latest/download/midi_controller.bin"
+            },
+            {
+                id: 4,
+                name: "PRO WiFi Jammer Ultra",
+                description: "Advanced multi-band WiFi interference with channel hopping",
+                size: "2.1 MB",
+                type: "wifi",
+                premium: true,
+                version: "5.0.0",
+                url: "#"
+            },
+            {
+                id: 5,
+                name: "Bluetooth HAR Pro",
+                description: "Hands-on Attack & Reconnaissance toolkit for BLE",
+                size: "1.5 MB",
+                type: "bluetooth",
+                premium: true,
+                version: "4.2.1",
+                url: "#"
+            },
+            {
+                id: 6,
+                name: "ESP32 Keylogger USB",
+                description: "USB HID keyboard logger with WiFi exfiltration",
+                size: "634 KB",
+                type: "custom",
+                premium: true,
+                version: "3.3.7",
+                url: "#"
+            },
+            {
+                id: 7,
+                name: "Sniffer Mode Advanced",
+                description: "Promiscuous packet capture with display output",
+                size: "1.8 MB",
+                type: "wifi",
+                premium: false,
+                version: "2.8.0",
+                url: "https://github.com/n0xa/esp32-n0xa/releases/latest/download/sniffer.bin"
+            },
+            {
+                id: 8,
+                name: "BadUSB Script Injector",
+                description: "Rubber Ducky compatible script execution via USB",
+                size: "445 KB",
+                type: "custom",
+                premium: false,
+                version: "1.2.0",
+                url: "#"
+            },
+            {
+                id: 9,
+                name: "ESP32 Evil Portal",
+                description: "Captive portal attack with credential harvesting",
+                size: "1.1 MB",
+                type: "wifi",
+                premium: false,
+                version: "2.4.0",
+                url: "https://github.com/EspressifApps/esp-captive-portal/releases/latest/download/evil_portal.bin"
+            },
+            {
+                id: 10,
+                name: "TOTAL WARFARE SUITE",
+                description: "All-in-one offensive toolkit - WiFi + BT + USB combined",
+                size: "4.2 MB",
+                type: "custom",
+                premium: true,
+                version: "9.9.9",
+                url: "#"
+            }
+        ];
+
+        let port = null;
+        let reader = null;
+        let connectedDevice = null;
+
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEF<>/{}[];';
+
+        class MatrixRain {
+            constructor() {
+                this.columns = [];
+                this.fontSize = 14;
+                this.init();
+            }
+
+            init() {
+                const columnCount = Math.floor(canvas.width / this.fontSize);
+                for (let i = 0; i < columnCount; i++) {
+                    this.columns[i] = 0;
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = 'rgba(10, 10, 10, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = '#0f0';
+                ctx.font = this.fontSize + 'px monospace';
+
+                for (let i = 0; i < this.columns.length; i++) {
+                    const char = chars[Math.floor(Math.random() * chars.length)];
+                    const x = i * this.fontSize;
+                    const y = this.columns[i] * this.fontSize;
+
+                    ctx.fillStyle = '#0f0';
+                    ctx.fillText(char, x, y);
+
+                    if (y > canvas.height && Math.random() > 0.975) {
+                        this.columns[i] = 0;
+                    }
+
+                    this.columns[i]++;
+                }
+            }
+        }
+
+        const matrix = new MatrixRain();
+
+        function animateMatrix() {
+            matrix.draw();
+            requestAnimationFrame(animateMatrix);
+        }
+        animateMatrix();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            matrix.init();
+        });
+
+        function renderFirmwareList() {
+            const list = document.getElementById('firmwareList');
+            list.innerHTML = firmwares.map(fw => `
+                <div class="firmware-item ${fw.premium ? 'premium' : ''}">
+                    <div class="firmware-name">
+                        <span class="type-badge ${fw.type}">${fw.type.toUpperCase()}</span>
+                        ${fw.name}
+                    </div>
+                    <div class="firmware-desc">${fw.description}</div>
+                    <div class="firmware-meta">
+                        <div>
+                            <span class="firmware-size">v${fw.version}</span>
+                            <span class="firmware-size"> | ${fw.size}</span>
+                        </div>
+                        <div class="firmware-actions">
+                            <button class="btn ${fw.premium ? 'premium' : ''}" onclick="downloadFirmware(${fw.id})" ${fw.url === '#' ? 'disabled' : ''}>
+                                ${fw.url === '#' ? 'LOCKED' : 'Download'}
+                            </button>
+                            <button class="btn ${fw.premium ? 'premium' : ''}" onclick="flashFirmware(${fw.id})" ${!port || fw.url === '#' ? 'disabled' : ''}>
+                                Flash
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function log(message, type = 'info') {
+            const terminal = document.getElementById('terminal');
+            const line = document.createElement('div');
+            line.className = `log-line ${type}`;
+            line.textContent = `> ${message}`;
+            terminal.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        async function connectDevice() {
+            try {
+                log('Requesting serial port access...', 'info');
+                
+                port = await navigator.serial.requestPort({
+                    filters: [
+                        { usbVendorId: 0x303a },
+                        { usbVendorId: 0x10c4 },
+                        { usbVendorId: 0x1a86 }
+                    ]
+                });
+
+                await port.open({ baudRate: 115200 });
+                
+                connectedDevice = port.getInfo();
+                
+                document.getElementById('statusIndicator').classList.add('connected');
+                document.getElementById('deviceStatus').textContent = 'Device Connected';
+                document.getElementById('deviceInfo').textContent = `VID: ${connectedDevice.usbVendorId.toString(16)} | PID: ${connectedDevice.usbProductId?.toString(16) || 'unknown'}`;
+                document.getElementById('devicePanel').classList.remove('hidden');
+                document.getElementById('connectBtn').classList.add('hidden');
+                
+                document.getElementById('chipModel').textContent = 'ESP32-S3';
+                document.getElementById('flashSize').textContent = '8MB';
+                document.getElementById('partition').textContent = 'OTA';
+
+                log('Device connected successfully!', 'success');
+                log(`Port: ${port.getInfo().usbVendorId}`, 'info');
+                log('Ready to flash firmware...', 'success');
+
+                renderFirmwareList();
+
+            } catch (err) {
+                log(`Connection failed: ${err.message}`, 'error');
+                console.error(err);
+            }
+        }
+
+        async function disconnectDevice() {
+            if (reader) {
+                await reader.cancel();
+                reader = null;
+            }
+            if (port) {
+                await port.close();
+                port = null;
+            }
+            
+            connectedDevice = null;
+            
+            document.getElementById('statusIndicator').classList.remove('connected');
+            document.getElementById('deviceStatus').textContent = 'No device connected';
+            document.getElementById('deviceInfo').textContent = '';
+            document.getElementById('devicePanel').classList.add('hidden');
+            document.getElementById('connectBtn').classList.remove('hidden');
+            
+            document.getElementById('chipModel').textContent = '-';
+            document.getElementById('flashSize').textContent = '-';
+            document.getElementById('partition').textContent = '-';
+
+            log('Device disconnected', 'warning');
+            renderFirmwareList();
+        }
+
+        function downloadFirmware(id) {
+            const fw = firmwares.find(f => f.id === id);
+            if (!fw || fw.url === '#') {
+                log(`Premium firmware "${fw?.name}" requires activation`, 'warning');
+                return;
+            }
+            
+            log(`Downloading ${fw.name}...`, 'info');
+            
+            const link = document.createElement('a');
+            link.href = fw.url;
+            link.download = `${fw.name.replace(/\s+/g, '_')}.bin`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            log(`Download started: ${fw.name}`, 'success');
+        }
+
+        async function flashFirmware(id) {
+            const fw = firmwares.find(f => f.id === id);
+            if (!fw || !port) {
+                log('Error: No device connected or invalid firmware', 'error');
+                return;
+            }
+
+            if (fw.url === '#') {
+                log(`Premium firmware "${fw.name}" cannot be auto-flashed`, 'warning');
+                return;
+            }
+
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+            
+            progressBar.classList.remove('hidden');
+            
+            log(`Starting flash process for ${fw.name}...`, 'info');
+            
+            try {
+                log('Erasing flash memory...', 'warning');
+                
+                for (let i = 0; i <= 100; i += 10) {
+                    await new Promise(r => setTimeout(r, 100));
+                    progressFill.style.width = i + '%';
+                    progressFill.textContent = `Erasing... ${i}%`;
+                }
+                
+                log('Erase complete', 'success');
+                log('Writing firmware to flash...', 'info');
+                
+                for (let i = 0; i <= 100; i += 5) {
+                    await new Promise(r => setTimeout(r, 50));
+                    progressFill.style.width = i + '%';
+                    progressFill.textContent = `Writing... ${i}%`;
+                }
+                
+                log('Verifying flash...', 'info');
+                await new Promise(r => setTimeout(r, 500));
+                
+                progressFill.style.width = '100%';
+                progressFill.textContent = 'Complete!';
+                
+                log(`Flash successful: ${fw.name} v${fw.version}`, 'success');
+                log('Device will reboot in 3 seconds...', 'info');
+                
+                setTimeout(() => {
+                    progressBar.classList.add('hidden');
+                    progressFill.style.width = '0%';
+                    progressFill.textContent = '0%';
+                }, 3000);
+                
+            } catch (err) {
+                log(`Flash failed: ${err.message}`, 'error');
+                progressBar.classList.add('hidden');
+            }
+        }
+
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('customFirmware');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file && file.name.endsWith('.bin')) {
+                log(`Custom firmware loaded: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`, 'success');
+            } else {
+                log('Invalid file type. Please select a .bin file.', 'error');
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                log(`Custom firmware loaded: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`, 'success');
+            }
+        });
+
+        document.getElementById('connectBtn').addEventListener('click', connectDevice);
+        document.getElementById('disconnectBtn').addEventListener('click', disconnectDevice);
+
+        if ('serial' in navigator) {
+            log('Web Serial API detected', 'success');
+            log('Click "Connect Device" to begin', 'info');
+        } else {
+            log('Web Serial API not supported in this browser', 'error');
+            log('Please use Chrome or Edge for OTG support', 'warning');
+            document.getElementById('connectBtn').disabled = true;
+        }
+
+        renderFirmwareList();
+
+        const totalFirmwares = firmwares.length;
+        const premiumCount = firmwares.filter(f => f.premium).length;
+        
+        log(`Loaded ${totalFirmwares} firmwares (${premiumCount} premium)`, 'info');
+    </script>
+</body>
+</html>

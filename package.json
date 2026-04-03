@@ -8,6 +8,7 @@
   "scripts": {
     "start": "electron .",
     "dev": "electron . --dev",
+    "web": "node server.js",
     "build": "electron-builder --win",
     "build:dir": "electron-builder --win --dir",
     "pack": "electron-builder --win portable",
