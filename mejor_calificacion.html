@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mejor Calificación - Estudiante Destacado</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .winner-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            margin: 30px;
+            padding: 40px;
+            border-radius: 15px;
+            color: white;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .trophy-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .winner-name {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .winner-grade {
+            font-size: 4em;
+            font-weight: bold;
+            margin: 20px 0;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .winner-details {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .winner-details p {
+            font-size: 1.2em;
+            margin: 10px 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            color: #667eea;
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .all-students {
+            padding: 30px;
+        }
+
+        .all-students h2 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.8em;
+        }
+
+        .students-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .students-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .students-table th,
+        .students-table td {
+            padding: 15px;
+            text-align: left;
+        }
+
+        .students-table th {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 1px;
+        }
+
+        .students-table tbody tr {
+            border-bottom: 1px solid #e9ecef;
+            transition: background-color 0.3s ease;
+        }
+
+        .students-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .students-table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .grade-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .grade-high {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .grade-medium {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .grade-low {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .position-badge {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            border-radius: 50%;
+            font-weight: bold;
+            color: white;
+            margin-right: 10px;
+        }
+
+        .position-1 {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+        }
+
+        .position-2 {
+            background: linear-gradient(135deg, #C0C0C0 0%, #808080 100%);
+        }
+
+        .position-3 {
+            background: linear-gradient(135deg, #CD7F32 0%, #8B4513 100%);
+        }
+
+        .position-other {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .footer {
+            background: #2d3748;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .winner-name {
+                font-size: 1.8em;
+            }
+
+            .winner-grade {
+                font-size: 3em;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .students-table {
+                font-size: 0.9em;
+            }
+
+            .students-table th,
+            .students-table td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 Estudiante Destacado</h1>
+            <p>Reconocimiento a la Excelencia Académica</p>
+        </div>
+
+        <div class="winner-card">
+            <div class="trophy-icon">🏆</div>
+            <div class="winner-name">María Elena Rodríguez</div>
+            <div class="winner-grade">98.5</div>
+            <div class="winner-details">
+                <p><strong>🎯 Promedio General:</strong> 98.5 / 100</p>
+                <p><strong>📚 Curso:</strong> Ingeniería en Sistemas Computacionales</p>
+                <p><strong>📅 Periodo:</strong> Enero - Junio 2026</p>
+                <p><strong>🌟 Reconocimiento:</strong> Estudiante con la Calificación Más Alta</p>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Estudiantes</div>
+                <div class="stat-value">156</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Promedio General</div>
+                <div class="stat-value">82.3</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Aprobados</div>
+                <div class="stat-value">148</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Excelencia (90+)</div>
+                <div class="stat-value">32</div>
+            </div>
+        </div>
+
+        <div class="all-students">
+            <h2>📊 Top 10 - Mejores Calificaciones</h2>
+            <table class="students-table">
+                <thead>
+                    <tr>
+                        <th>Posición</th>
+                        <th>Nombre</th>
+                        <th>Matrícula</th>
+                        <th>Calificación</th>
+                        <th>Curso</th>
+                    </tr>
+                </thead>
+                <tbody id="studentsTableBody">
+                    <!-- Data will be inserted by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="footer">
+            <p>🎓 Sistema de Gestión Académica - © 2026</p>
+            <p>Generado automáticamente el 3 de Abril, 2026</p>
+        </div>
+    </div>
+
+    <script>
+        // Student data
+        const students = [
+            { position: 1, name: "María Elena Rodríguez", id: "A00198456", grade: 98.5, course: "Ing. Sistemas" },
+            { position: 2, name: "Carlos Alberto Mendoza", id: "A00197823", grade: 97.2, course: "Ing. Sistemas" },
+            { position: 3, name: "Ana Patricia González", id: "A00196745", grade: 96.8, course: "Ing. Industrial" },
+            { position: 4, name: "Roberto Sánchez López", id: "A00199234", grade: 95.3, course: "Ing. Mecatrónica" },
+            { position: 5, name: "Diana Laura Martínez", id: "A00198765", grade: 94.7, course: "Ing. Sistemas" },
+            { position: 6, name: "Fernando Javier Ruiz", id: "A00197456", grade: 93.9, course: "Ing. Civil" },
+            { position: 7, name: "Gabriela Torres Vega", id: "A00198123", grade: 93.2, course: "Ing. Industrial" },
+            { position: 8, name: "Luis Miguel Hernández", id: "A00199567", grade: 92.8, course: "Ing. Sistemas" },
+            { position: 9, name: "Patricia Ramírez Cruz", id: "A00197890", grade: 92.1, course: "Ing. Química" },
+            { position: 10, name: "Jorge Eduardo Flores", id: "A00198901", grade: 91.5, course: "Ing. Mecatrónica" }
+        ];
+
+        // Get grade badge class
+        function getGradeBadgeClass(grade) {
+            if (grade >= 95) return 'grade-high';
+            if (grade >= 85) return 'grade-medium';
+            return 'grade-low';
+        }
+
+        // Get position badge class
+        function getPositionBadgeClass(position) {
+            if (position === 1) return 'position-1';
+            if (position === 2) return 'position-2';
+            if (position === 3) return 'position-3';
+            return 'position-other';
+        }
+
+        // Populate table
+        const tableBody = document.getElementById('studentsTableBody');
+        students.forEach(student => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>
+                    <span class="position-badge ${getPositionBadgeClass(student.position)}">
+                        ${student.position}
+                    </span>
+                </td>
+                <td><strong>${student.name}</strong></td>
+                <td>${student.id}</td>
+                <td>
+                    <span class="grade-badge ${getGradeBadgeClass(student.grade)}">
+                        ${student.grade}
+                    </span>
+                </td>
+                <td>${student.course}</td>
+            `;
+            tableBody.appendChild(row);
+        });
+
+        // Add animation on load
+        window.addEventListener('load', () => {
+            const cards = document.querySelectorAll('.stat-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.animation = 'slideIn 0.5s ease-out';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>
