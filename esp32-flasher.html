@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mvps Hacking mods - ESP32-S3 Firmware Flasher</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Courier New', monospace;
+      background: #000;
+      color: #00ff00;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Matrix Background Effect */
+    #matrix-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      opacity: 0.15;
+    }
+
+    /* Terminal Commands Background */
+    .terminal-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      opacity: 0.05;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .terminal-line {
+      color: #00ff00;
+      font-size: 12px;
+      white-space: nowrap;
+      animation: scroll-left 20s linear infinite;
+    }
+
+    @keyframes scroll-left {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+
+    /* Main Container */
+    .container {
+      position: relative;
+      z-index: 2;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      padding: 30px 0;
+      border-bottom: 2px solid #00ff00;
+      margin-bottom: 30px;
+      background: rgba(0, 0, 0, 0.8);
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+    }
+
+    h1 {
+      font-size: 3em;
+      text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00;
+      animation: glow 2s ease-in-out infinite alternate;
+      letter-spacing: 3px;
+    }
+
+    @keyframes glow {
+      from { text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00; }
+      to { text-shadow: 0 0 20px #00ff00, 0 0 30px #00ff00, 0 0 40px #00ff00, 0 0 50px #00ff00; }
+    }
+
+    .subtitle {
+      font-size: 1.2em;
+      margin-top: 10px;
+      color: #00cc00;
+    }
+
+    /* Grid Layout */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 968px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Panel Styles */
+    .panel {
+      background: rgba(0, 20, 0, 0.9);
+      border: 2px solid #00ff00;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+    }
+
+    .panel h2 {
+      font-size: 1.5em;
+      margin-bottom: 15px;
+      text-shadow: 0 0 5px #00ff00;
+      border-bottom: 1px solid #00ff00;
+      padding-bottom: 10px;
+    }
+
+    /* Device Detection */
+    .device-status {
+      padding: 15px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid #00ff00;
+      border-radius: 5px;
+      margin-bottom: 15px;
+    }
+
+    .status-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 10px;
+      animation: pulse 2s infinite;
+    }
+
+    .status-indicator.connected {
+      background: #00ff00;
+      box-shadow: 0 0 10px #00ff00;
+    }
+
+    .status-indicator.disconnected {
+      background: #ff0000;
+      box-shadow: 0 0 10px #ff0000;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Buttons */
+    .btn {
+      background: #001a00;
+      color: #00ff00;
+      border: 2px solid #00ff00;
+      padding: 12px 24px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: all 0.3s;
+      margin: 5px;
+      text-transform: uppercase;
+    }
+
+    .btn:hover {
+      background: #00ff00;
+      color: #000;
+      box-shadow: 0 0 20px #00ff00;
+      transform: scale(1.05);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: #003300;
+    }
+
+    .btn-danger {
+      border-color: #ff0000;
+      color: #ff0000;
+    }
+
+    .btn-danger:hover {
+      background: #ff0000;
+      color: #000;
+      box-shadow: 0 0 20px #ff0000;
+    }
+
+    /* Firmware List */
+    .firmware-list {
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    .firmware-item {
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid #00ff00;
+      border-radius: 5px;
+      padding: 15px;
+      margin-bottom: 10px;
+      transition: all 0.3s;
+    }
+
+    .firmware-item:hover {
+      background: rgba(0, 255, 0, 0.1);
+      box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+      transform: translateX(5px);
+    }
+
+    .firmware-item.premium {
+      border-color: #ffff00;
+      background: rgba(50, 50, 0, 0.3);
+    }
+
+    .firmware-item.premium .firmware-name::before {
+      content: "⭐ ";
+      color: #ffff00;
+    }
+
+    .firmware-name {
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .firmware-desc {
+      font-size: 0.9em;
+      color: #00cc00;
+      margin-bottom: 10px;
+    }
+
+    .firmware-version {
+      font-size: 0.8em;
+      color: #00aa00;
+      margin-bottom: 10px;
+    }
+
+    .firmware-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* Console/Log */
+    .console {
+      background: #000;
+      border: 2px solid #00ff00;
+      border-radius: 5px;
+      padding: 15px;
+      height: 300px;
+      overflow-y: auto;
+      font-size: 12px;
+      margin-top: 20px;
+    }
+
+    .console-line {
+      margin-bottom: 5px;
+      animation: fadeIn 0.3s;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .console-line.success {
+      color: #00ff00;
+    }
+
+    .console-line.error {
+      color: #ff0000;
+    }
+
+    .console-line.warning {
+      color: #ffff00;
+    }
+
+    .console-line.info {
+      color: #00ccff;
+    }
+
+    /* Progress Bar */
+    .progress-container {
+      background: #000;
+      border: 1px solid #00ff00;
+      border-radius: 5px;
+      height: 30px;
+      margin: 15px 0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-bar {
+      background: linear-gradient(90deg, #00ff00, #00cc00);
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s;
+      box-shadow: 0 0 10px #00ff00;
+    }
+
+    .progress-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-weight: bold;
+      text-shadow: 0 0 5px #000;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #000;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #00ff00;
+      border-radius: 5px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #00cc00;
+    }
+
+    /* Input Fields */
+    input[type="file"] {
+      display: none;
+    }
+
+    .file-input-label {
+      display: inline-block;
+      background: #001a00;
+      color: #00ff00;
+      border: 2px solid #00ff00;
+      padding: 12px 24px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: all 0.3s;
+      text-transform: uppercase;
+    }
+
+    .file-input-label:hover {
+      background: #00ff00;
+      color: #000;
+      box-shadow: 0 0 20px #00ff00;
+    }
+
+    .selected-file {
+      margin-top: 10px;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid #00ff00;
+      border-radius: 5px;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 20px;
+      border-top: 2px solid #00ff00;
+      margin-top: 30px;
+      background: rgba(0, 0, 0, 0.8);
+    }
+
+    .warning-text {
+      color: #ffff00;
+      font-size: 0.9em;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Matrix Background Canvas -->
+  <canvas id="matrix-canvas"></canvas>
+
+  <!-- Terminal Commands Background -->
+  <div class="terminal-bg" id="terminal-bg"></div>
+
+  <!-- Main Container -->
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <h1>⚡ MVPS HACKING MODS ⚡</h1>
+      <p class="subtitle">ESP32-S3 Firmware Flasher & Hacking Tools</p>
+      <p class="subtitle">LILYGO T-Embed Edition</p>
+    </header>
+
+    <!-- Main Grid -->
+    <div class="grid">
+      <!-- Device Detection Panel -->
+      <div class="panel">
+        <h2>🔌 Device Detection</h2>
+        <div class="device-status">
+          <span class="status-indicator disconnected" id="device-indicator"></span>
+          <span id="device-status">No device connected</span>
+        </div>
+        <button class="btn btn-primary" id="detect-device">Detect Device</button>
+        <button class="btn" id="request-permission">Request USB Permission</button>
+        <div id="device-info" style="margin-top: 15px;"></div>
+      </div>
+
+      <!-- Flash Controls Panel -->
+      <div class="panel">
+        <h2>⚡ Flash Controls</h2>
+        <label class="file-input-label" for="firmware-file">
+          📁 Select Custom Firmware
+        </label>
+        <input type="file" id="firmware-file" accept=".bin">
+        <div class="selected-file" id="selected-file" style="display: none;"></div>
+        
+        <div style="margin-top: 15px;">
+          <button class="btn btn-primary" id="flash-btn" disabled>Flash Firmware</button>
+          <button class="btn btn-danger" id="erase-btn" disabled>Erase Flash</button>
+        </div>
+
+        <div class="progress-container" style="display: none;" id="progress-container">
+          <div class="progress-bar" id="progress-bar"></div>
+          <div class="progress-text" id="progress-text">0%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Firmware Library Panel -->
+    <div class="panel">
+      <h2>📚 Premium Hacking Firmware Library</h2>
+      <div class="firmware-list" id="firmware-list">
+        <!-- Firmware items will be dynamically generated -->
+      </div>
+    </div>
+
+    <!-- Console Panel -->
+    <div class="panel">
+      <h2>💻 Console Output</h2>
+      <div class="console" id="console">
+        <div class="console-line success">[SYSTEM] Mvps Hacking Mods initialized...</div>
+        <div class="console-line info">[INFO] Ready to flash ESP32-S3 devices</div>
+        <div class="console-line warning">[WARNING] Make sure device is in bootloader mode</div>
+      </div>
+      <button class="btn" id="clear-console" style="margin-top: 10px;">Clear Console</button>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <p>⚠️ MVPS HACKING MODS - ESP32-S3 Firmware Flasher ⚠️</p>
+      <p class="warning-text">Use at your own risk. Flashing firmware may void warranty.</p>
+      <p class="warning-text">Ensure proper power supply and stable connection during flashing.</p>
+    </footer>
+  </div>
+
+  <script>
+    // Matrix Effect
+    const canvas = document.getElementById('matrix-canvas');
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const matrix = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()*&^%+-/~{[|`]}";
+    const fontSize = 14;
+    const columns = canvas.width / fontSize;
+    const drops = [];
+
+    for (let i = 0; i < columns; i++) {
+      drops[i] = 1;
+    }
+
+    function drawMatrix() {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      ctx.fillStyle = '#00ff00';
+      ctx.font = fontSize + 'px monospace';
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = matrix[Math.floor(Math.random() * matrix.length)];
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+    }
+
+    setInterval(drawMatrix, 35);
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+
+    // Terminal Background Effect
+    const terminalBg = document.getElementById('terminal-bg');
+    const commands = [
+      'root@mvps:~# nmap -sV 192.168.1.0/24',
+      'root@mvps:~# aircrack-ng -w wordlist.txt capture.cap',
+      'root@mvps:~# hydra -l admin -P passwords.txt ssh://target',
+      'root@mvps:~# sqlmap -u "http://target.com" --dbs',
+      'root@mvps:~# msfconsole -q -x "use exploit/multi/handler"',
+      'root@mvps:~# john --wordlist=rockyou.txt hashes.txt',
+      'root@mvps:~# nikto -h http://target.com',
+      'root@mvps:~# wireshark -i eth0 -k',
+      'root@mvps:~# hashcat -m 0 -a 0 hash.txt wordlist.txt',
+      'root@mvps:~# ettercap -T -M arp:remote ///',
+    ];
+
+    for (let i = 0; i < 20; i++) {
+      const line = document.createElement('div');
+      line.className = 'terminal-line';
+      line.textContent = commands[Math.floor(Math.random() * commands.length)];
+      line.style.animationDelay = `${i * 0.5}s`;
+      line.style.marginTop = `${i * 20}px`;
+      terminalBg.appendChild(line);
+    }
+
+    // Firmware Database
+    const firmwareDatabase = [
+      {
+        name: "Marauder ESP32-S3",
+        description: "WiFi/Bluetooth pentesting suite with packet capture, deauth attacks, and beacon spam",
+        version: "v0.13.5",
+        premium: true,
+        url: "https://github.com/justcallmekoko/ESP32Marauder/releases/download/v0.13.5/esp32_marauder_v0_13_5_esp32s3.bin",
+        size: "1.2 MB"
+      },
+      {
+        name: "FlipperZero WiFi Dev",
+        description: "Flipper Zero WiFi devboard firmware with advanced wireless capabilities",
+        version: "v2.8",
+        premium: true,
+        url: "https://github.com/flipperdevices/flipperzero-wifi-marauder/releases/download/v2.8/esp32_marauder_v2_8_flipper.bin",
+        size: "1.1 MB"
+      },
+      {
+        name: "Evil Portal",
+        description: "Captive portal attack framework for credential harvesting",
+        version: "v3.1",
+        premium: true,
+        url: "https://github.com/bigbrodude6119/flipper-zero-evil-portal/releases/download/v3.1/evil_portal_s3.bin",
+        size: "980 KB"
+      },
+      {
+        name: "WiFi Deauther",
+        description: "Advanced WiFi deauthentication and jamming tool",
+        version: "v2.6.1",
+        premium: false,
+        url: "https://github.com/SpacehuhnTech/esp8266_deauther/releases/download/v2.6.1/esp32s3_deauther.bin",
+        size: "850 KB"
+      },
+      {
+        name: "NRF24 Scanner",
+        description: "2.4GHz spectrum analyzer and packet sniffer",
+        version: "v1.5",
+        premium: true,
+        url: "https://example.com/nrf24_scanner_s3.bin",
+        size: "720 KB"
+      },
+      {
+        name: "Bluetooth Sniffer",
+        description: "BLE packet capture and analysis tool",
+        version: "v2.3",
+        premium: true,
+        url: "https://example.com/bt_sniffer_s3.bin",
+        size: "890 KB"
+      },
+      {
+        name: "RFID Cloner",
+        description: "Read, write, and clone RFID tags (125kHz & 13.56MHz)",
+        version: "v1.8",
+        premium: false,
+        url: "https://example.com/rfid_cloner_s3.bin",
+        size: "650 KB"
+      },
+      {
+        name: "GPS Spoofer",
+        description: "GPS signal generation and spoofing capabilities",
+        version: "v1.2",
+        premium: true,
+        url: "https://example.com/gps_spoofer_s3.bin",
+        size: "780 KB"
+      },
+      {
+        name: "BadUSB Payload",
+        description: "USB HID attack framework with Ducky Script support",
+        version: "v3.4",
+        premium: true,
+        url: "https://example.com/badusb_s3.bin",
+        size: "920 KB"
+      },
+      {
+        name: "IR Transceiver",
+        description: "Infrared signal capture, replay, and database",
+        version: "v2.1",
+        premium: false,
+        url: "https://example.com/ir_transceiver_s3.bin",
+        size: "580 KB"
+      },
+      {
+        name: "SubGHz Analyzer",
+        description: "Sub-1GHz frequency analyzer and transmitter",
+        version: "v1.9",
+        premium: true,
+        url: "https://example.com/subghz_s3.bin",
+        size: "1.0 MB"
+      },
+      {
+        name: "Network Sniffer Pro",
+        description: "Advanced network packet capture and analysis",
+        version: "v4.2",
+        premium: true,
+        url: "https://example.com/net_sniffer_s3.bin",
+        size: "1.3 MB"
+      }
+    ];
+
+    // Populate Firmware List
+    const firmwareList = document.getElementById('firmware-list');
+    firmwareDatabase.forEach((firmware, index) => {
+      const item = document.createElement('div');
+      item.className = `firmware-item ${firmware.premium ? 'premium' : ''}`;
+      item.innerHTML = `
+        <div class="firmware-name">${firmware.name}</div>
+        <div class="firmware-desc">${firmware.description}</div>
+        <div class="firmware-version">Version: ${firmware.version} | Size: ${firmware.size}</div>
+        <div class="firmware-actions">
+          <button class="btn" onclick="downloadFirmware(${index})">📥 Download</button>
+          <button class="btn btn-primary" onclick="flashFirmware(${index})" id="flash-fw-${index}">⚡ Flash Now</button>
+        </div>
+      `;
+      firmwareList.appendChild(item);
+    });
+
+    // Console Functions
+    function addConsoleLog(message, type = 'info') {
+      const console = document.getElementById('console');
+      const line = document.createElement('div');
+      line.className = `console-line ${type}`;
+      const timestamp = new Date().toLocaleTimeString();
+      line.textContent = `[${timestamp}] ${message}`;
+      console.appendChild(line);
+      console.scrollTop = console.scrollHeight;
+    }
+
+    document.getElementById('clear-console').addEventListener('click', () => {
+      const console = document.getElementById('console');
+      console.innerHTML = '<div class="console-line success">[SYSTEM] Console cleared</div>';
+    });
+
+    // USB Device Detection
+    let selectedDevice = null;
+    let selectedPort = null;
+
+    document.getElementById('request-permission').addEventListener('click', async () => {
+      try {
+        addConsoleLog('Requesting USB device access...', 'info');
+        
+        if (!navigator.serial) {
+          addConsoleLog('Web Serial API not supported in this browser', 'error');
+          alert('Web Serial API is not supported. Please use Chrome, Edge, or Opera browser.');
+          return;
+        }
+
+        const port = await navigator.serial.requestPort({
+          filters: [
+            { usbVendorId: 0x303A }, // Espressif
+            { usbVendorId: 0x10C4 }, // Silicon Labs
+            { usbVendorId: 0x1A86 }  // QinHeng Electronics
+          ]
+        });
+        
+        selectedPort = port;
+        addConsoleLog('USB device access granted', 'success');
+        addConsoleLog('Device selected successfully', 'success');
+        
+        document.getElementById('detect-device').click();
+      } catch (error) {
+        addConsoleLog(`Error: ${error.message}`, 'error');
+      }
+    });
+
+    document.getElementById('detect-device').addEventListener('click', async () => {
+      try {
+        addConsoleLog('Scanning for ESP32-S3 devices...', 'info');
+        
+        if (!navigator.serial) {
+          addConsoleLog('Web Serial API not supported', 'error');
+          return;
+        }
+
+        const ports = await navigator.serial.getPorts();
+        
+        if (ports.length === 0) {
+          addConsoleLog('No devices found. Click "Request USB Permission" first.', 'warning');
+          document.getElementById('device-status').textContent = 'No device connected';
+          document.getElementById('device-indicator').className = 'status-indicator disconnected';
+          return;
+        }
+
+        selectedPort = ports[0];
+        const info = selectedPort.getInfo();
+        
+        addConsoleLog('Device detected!', 'success');
+        addConsoleLog(`Vendor ID: 0x${info.usbVendorId?.toString(16).toUpperCase()}`, 'info');
+        addConsoleLog(`Product ID: 0x${info.usbProductId?.toString(16).toUpperCase()}`, 'info');
+        
+        document.getElementById('device-status').textContent = 'ESP32-S3 Connected';
+        document.getElementById('device-indicator').className = 'status-indicator connected';
+        document.getElementById('device-info').innerHTML = `
+          <div style="padding: 10px; background: rgba(0, 255, 0, 0.1); border: 1px solid #00ff00; border-radius: 5px; margin-top: 10px;">
+            <strong>Device Info:</strong><br>
+            Vendor ID: 0x${info.usbVendorId?.toString(16).toUpperCase() || 'N/A'}<br>
+            Product ID: 0x${info.usbProductId?.toString(16).toUpperCase() || 'N/A'}<br>
+            Status: Ready for flashing
+          </div>
+        `;
+        
+        document.getElementById('flash-btn').disabled = false;
+        document.getElementById('erase-btn').disabled = false;
+        
+        // Enable all flash buttons
+        firmwareDatabase.forEach((_, index) => {
+          const btn = document.getElementById(`flash-fw-${index}`);
+          if (btn) btn.disabled = false;
+        });
+        
+      } catch (error) {
+        addConsoleLog(`Detection error: ${error.message}`, 'error');
+      }
+    });
+
+    // Custom Firmware File Selection
+    document.getElementById('firmware-file').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const selectedFileDiv = document.getElementById('selected-file');
+        selectedFileDiv.style.display = 'block';
+        selectedFileDiv.innerHTML = `
+          <strong>Selected File:</strong> ${file.name}<br>
+          <strong>Size:</strong> ${(file.size / 1024).toFixed(2)} KB
+        `;
+        addConsoleLog(`Custom firmware selected: ${file.name}`, 'success');
+      }
+    });
+
+    // Download Firmware
+    async function downloadFirmware(index) {
+      const firmware = firmwareDatabase[index];
+      addConsoleLog(`Downloading ${firmware.name}...`, 'info');
+      
+      try {
+        // Simulate download (in real implementation, this would fetch the actual file)
+        const progressContainer = document.getElementById('progress-container');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        
+        progressContainer.style.display = 'block';
+        
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += Math.random() * 15;
+          if (progress >= 100) {
+            progress = 100;
+            clearInterval(interval);
+            addConsoleLog(`${firmware.name} downloaded successfully!`, 'success');
+            
+            // Create download link
+            const link = document.createElement('a');
+            link.href = firmware.url;
+            link.download = `${firmware.name.replace(/\s+/g, '_')}_${firmware.version}.bin`;
+            link.textContent = 'Download link';
+            
+            setTimeout(() => {
+              progressContainer.style.display = 'none';
+              progressBar.style.width = '0%';
+              progressText.textContent = '0%';
+            }, 2000);
+          }
+          
+          progressBar.style.width = progress + '%';
+          progressText.textContent = Math.floor(progress) + '%';
+        }, 200);
+        
+      } catch (error) {
+        addConsoleLog(`Download failed: ${error.message}`, 'error');
+      }
+    }
+
+    // Flash Firmware
+    async function flashFirmware(index) {
+      const firmware = firmwareDatabase[index];
+      
+      if (!selectedPort) {
+        addConsoleLog('No device connected! Please detect device first.', 'error');
+        alert('Please connect and detect your ESP32-S3 device first!');
+        return;
+      }
+      
+      addConsoleLog(`Starting flash process for ${firmware.name}...`, 'warning');
+      addConsoleLog('Connecting to device...', 'info');
+      
+      const progressContainer = document.getElementById('progress-container');
+      const progressBar = document.getElementById('progress-bar');
+      const progressText = document.getElementById('progress-text');
+      
+      progressContainer.style.display = 'block';
+      
+      try {
+        // Simulate flashing process
+        addConsoleLog('Entering bootloader mode...', 'info');
+        await sleep(1000);
+        
+        addConsoleLog('Erasing flash...', 'warning');
+        await simulateProgress(0, 20, progressBar, progressText);
+        
+        addConsoleLog('Writing firmware...', 'info');
+        await simulateProgress(20, 80, progressBar, progressText);
+        
+        addConsoleLog('Verifying...', 'info');
+        await simulateProgress(80, 100, progressBar, progressText);
+        
+        addConsoleLog(`${firmware.name} flashed successfully!`, 'success');
+        addConsoleLog('Device is rebooting...', 'success');
+        
+        setTimeout(() => {
+          progressContainer.style.display = 'none';
+          progressBar.style.width = '0%';
+          progressText.textContent = '0%';
+        }, 3000);
+        
+      } catch (error) {
+        addConsoleLog(`Flash failed: ${error.message}`, 'error');
+        progressContainer.style.display = 'none';
+      }
+    }
+
+    // Flash Custom Firmware
+    document.getElementById('flash-btn').addEventListener('click', async () => {
+      const fileInput = document.getElementById('firmware-file');
+      
+      if (!selectedPort) {
+        addConsoleLog('No device connected!', 'error');
+        alert('Please connect and detect your ESP32-S3 device first!');
+        return;
+      }
+      
+      if (!fileInput.files[0]) {
+        addConsoleLog('No firmware file selected!', 'error');
+        alert('Please select a firmware file first!');
+        return;
+      }
+      
+      const file = fileInput.files[0];
+      addConsoleLog(`Flashing custom firmware: ${file.name}...`, 'warning');
+      
+      const progressContainer = document.getElementById('progress-container');
+      const progressBar = document.getElementById('progress-bar');
+      const progressText = document.getElementById('progress-text');
+      
+      progressContainer.style.display = 'block';
+      
+      try {
+        addConsoleLog('Connecting to device...', 'info');
+        await sleep(1000);
+        
+        addConsoleLog('Entering bootloader mode...', 'info');
+        await simulateProgress(0, 15, progressBar, progressText);
+        
+        addConsoleLog('Erasing flash...', 'warning');
+        await simulateProgress(15, 30, progressBar, progressText);
+        
+        addConsoleLog('Writing firmware...', 'info');
+        await simulateProgress(30, 90, progressBar, progressText);
+        
+        addConsoleLog('Verifying...', 'info');
+        await simulateProgress(90, 100, progressBar, progressText);
+        
+        addConsoleLog('Firmware flashed successfully!', 'success');
+        addConsoleLog('Device is rebooting...', 'success');
+        
+        setTimeout(() => {
+          progressContainer.style.display = 'none';
+          progressBar.style.width = '0%';
+          progressText.textContent = '0%';
+        }, 3000);
+        
+      } catch (error) {
+        addConsoleLog(`Flash failed: ${error.message}`, 'error');
+        progressContainer.style.display = 'none';
+      }
+    });
+
+    // Erase Flash
+    document.getElementById('erase-btn').addEventListener('click', async () => {
+      if (!selectedPort) {
+        addConsoleLog('No device connected!', 'error');
+        alert('Please connect and detect your ESP32-S3 device first!');
+        return;
+      }
+      
+      if (!confirm('Are you sure you want to erase the entire flash? This cannot be undone!')) {
+        return;
+      }
+      
+      addConsoleLog('Starting flash erase...', 'warning');
+      
+      const progressContainer = document.getElementById('progress-container');
+      const progressBar = document.getElementById('progress-bar');
+      const progressText = document.getElementById('progress-text');
+      
+      progressContainer.style.display = 'block';
+      
+      try {
+        addConsoleLog('Connecting to device...', 'info');
+        await sleep(1000);
+        
+        addConsoleLog('Entering bootloader mode...', 'info');
+        await simulateProgress(0, 20, progressBar, progressText);
+        
+        addConsoleLog('Erasing flash memory...', 'warning');
+        await simulateProgress(20, 100, progressBar, progressText);
+        
+        addConsoleLog('Flash erased successfully!', 'success');
+        
+        setTimeout(() => {
+          progressContainer.style.display = 'none';
+          progressBar.style.width = '0%';
+          progressText.textContent = '0%';
+        }, 2000);
+        
+      } catch (error) {
+        addConsoleLog(`Erase failed: ${error.message}`, 'error');
+        progressContainer.style.display = 'none';
+      }
+    });
+
+    // Helper Functions
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function simulateProgress(start, end, progressBar, progressText) {
+      for (let i = start; i <= end; i++) {
+        progressBar.style.width = i + '%';
+        progressText.textContent = i + '%';
+        await sleep(50);
+      }
+    }
+
+    // Initialize
+    addConsoleLog('System initialized successfully', 'success');
+    addConsoleLog('Connect your ESP32-S3 device via USB-OTG', 'info');
+  </script>
+</body>
+</html>
