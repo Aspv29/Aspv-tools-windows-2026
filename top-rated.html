@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mvps Hacking Mods - Top Rated Leaderboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #000000;
+      --bg-panel: #0a0f0a;
+      --bg-card: #0d120d;
+      --green-primary: #00ff41;
+      --green-dim: #00cc33;
+      --green-dark: #009922;
+      --green-glow: rgba(0, 255, 65, 0.15);
+      --green-border: rgba(0, 255, 65, 0.2);
+      --red: #ff0040;
+      --yellow: #ffff00;
+      --cyan: #00ffff;
+      --purple: #bf00ff;
+      --orange: #ff6600;
+      --gold: #ffd700;
+      --silver: #c0c0c0;
+      --bronze: #cd7f32;
+      --text: #00ff41;
+      --text-dim: #33aa55;
+      --text-bright: #66ff88;
+      --font-mono: 'Share Tech Mono', 'Consolas', monospace;
+      --font-title: 'Orbitron', 'Share Tech Mono', monospace;
+      --border: rgba(0, 255, 65, 0.15);
+      --shadow-green: 0 0 10px rgba(0, 255, 65, 0.2), 0 0 30px rgba(0, 255, 65, 0.05);
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100%; min-height: 100vh;
+      background: var(--bg-dark);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 14px;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--green-primary); color: #000; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #000; }
+    ::-webkit-scrollbar-thumb { background: var(--green-dark); border-radius: 3px; }
+
+    /* Matrix Canvas */
+    #matrixCanvas {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0; opacity: 0.1;
+      pointer-events: none;
+    }
+
+    /* Scanlines */
+    .scanlines {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%; z-index: 1;
+      pointer-events: none;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,65,0.015) 2px, rgba(0,255,65,0.015) 4px);
+    }
+
+    /* Main wrapper */
+    .wrapper {
+      position: relative; z-index: 2;
+      max-width: 1200px; margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      padding: 40px 20px 30px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 30px;
+    }
+
+    .header-skull {
+      display: inline-block;
+      animation: pulse-glow 2s ease-in-out infinite;
+      margin-bottom: 15px;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { filter: drop-shadow(0 0 4px rgba(0,255,65,0.5)); }
+      50% { filter: drop-shadow(0 0 15px rgba(0,255,65,0.9)); }
+    }
+
+    .main-title {
+      font-family: var(--font-title);
+      font-size: 36px; font-weight: 900;
+      color: var(--green-primary);
+      text-shadow: 0 0 10px rgba(0,255,65,0.7), 0 0 20px rgba(0,255,65,0.4), 0 0 40px rgba(0,255,65,0.2);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      position: relative;
+    }
+
+    .main-title::before, .main-title::after {
+      content: attr(data-text);
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+    }
+    .main-title::before { color: var(--cyan); animation: glitch1 3s infinite linear; clip-path: polygon(0 0,100% 0,100% 33%,0 33%); }
+    .main-title::after { color: var(--red); animation: glitch2 3s infinite linear; clip-path: polygon(0 67%,100% 67%,100% 100%,0 100%); }
+
+    @keyframes glitch1 {
+      0%,90%,100%{transform:translate(0)} 92%{transform:translate(-3px,1px)} 94%{transform:translate(3px,-1px)} 96%{transform:translate(-2px,0)}
+    }
+    @keyframes glitch2 {
+      0%,88%,100%{transform:translate(0)} 90%{transform:translate(3px,-1px)} 93%{transform:translate(-3px,1px)} 96%{transform:translate(2px,0)}
+    }
+
+    .subtitle {
+      font-size: 13px; color: var(--text-dim);
+      letter-spacing: 2px; margin-top: 10px;
+      border-right: 2px solid var(--green-primary);
+      display: inline-block;
+      animation: cursor-blink 0.8s step-end infinite;
+    }
+
+    @keyframes cursor-blink {
+      0%,100%{border-color:var(--green-primary)} 50%{border-color:transparent}
+    }
+
+    /* Trophy Section */
+    .trophy-section {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .trophy-icon {
+      font-size: 64px;
+      animation: trophy-float 3s ease-in-out infinite;
+      display: inline-block;
+    }
+
+    @keyframes trophy-float {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .trophy-label {
+      font-family: var(--font-title);
+      font-size: 20px;
+      color: var(--gold);
+      text-shadow: 0 0 10px rgba(255,215,0,0.5);
+      letter-spacing: 3px;
+      margin-top: 10px;
+    }
+
+    /* Stats Bar */
+    .stats-bar {
+      display: flex; justify-content: center;
+      gap: 30px; margin-bottom: 35px;
+      flex-wrap: wrap;
+    }
+
+    .stat-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 14px 24px;
+      text-align: center;
+      min-width: 140px;
+      transition: all 0.3s;
+    }
+
+    .stat-box:hover {
+      border-color: var(--green-dim);
+      box-shadow: var(--shadow-green);
+    }
+
+    .stat-box .val {
+      font-family: var(--font-title);
+      font-size: 28px; font-weight: 900;
+      color: var(--green-primary);
+      text-shadow: 0 0 10px rgba(0,255,65,0.5);
+    }
+
+    .stat-box .lbl {
+      font-size: 10px; color: var(--text-dim);
+      letter-spacing: 1.5px; text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    /* Filters */
+    .filters {
+      display: flex; justify-content: center;
+      gap: 10px; margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 6px 16px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+      font-size: 11px; cursor: pointer;
+      letter-spacing: 1px;
+      transition: all 0.2s;
+      text-transform: uppercase;
+    }
+
+    .filter-btn:hover { border-color: var(--green-dim); color: var(--green-primary); }
+    .filter-btn.active { background: var(--green-glow); border-color: var(--green-primary); color: var(--green-primary); }
+
+    /* Podium */
+    .podium {
+      display: flex; justify-content: center;
+      align-items: flex-end;
+      gap: 16px;
+      margin-bottom: 40px;
+      padding: 20px 0;
+    }
+
+    .podium-place {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px 8px 0 0;
+      text-align: center;
+      padding: 20px;
+      position: relative;
+      transition: all 0.4s;
+      cursor: default;
+    }
+
+    .podium-place:hover {
+      transform: translateY(-5px);
+    }
+
+    .podium-place.gold {
+      border-color: rgba(255,215,0,0.4);
+      min-height: 280px; width: 240px;
+      box-shadow: 0 0 20px rgba(255,215,0,0.15);
+    }
+    .podium-place.gold:hover { box-shadow: 0 0 30px rgba(255,215,0,0.3); }
+
+    .podium-place.silver {
+      border-color: rgba(192,192,192,0.4);
+      min-height: 240px; width: 220px;
+      box-shadow: 0 0 15px rgba(192,192,192,0.1);
+    }
+
+    .podium-place.bronze {
+      border-color: rgba(205,127,50,0.4);
+      min-height: 210px; width: 220px;
+      box-shadow: 0 0 15px rgba(205,127,50,0.1);
+    }
+
+    .podium-rank {
+      font-family: var(--font-title);
+      font-size: 42px; font-weight: 900;
+      line-height: 1;
+    }
+
+    .gold .podium-rank { color: var(--gold); text-shadow: 0 0 15px rgba(255,215,0,0.6); }
+    .silver .podium-rank { color: var(--silver); text-shadow: 0 0 12px rgba(192,192,192,0.5); }
+    .bronze .podium-rank { color: var(--bronze); text-shadow: 0 0 12px rgba(205,127,50,0.5); }
+
+    .podium-medal { font-size: 36px; margin: 8px 0; }
+
+    .podium-name {
+      font-family: var(--font-title);
+      font-size: 13px;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    .gold .podium-name { color: var(--gold); }
+    .silver .podium-name { color: var(--silver); }
+    .bronze .podium-name { color: var(--bronze); }
+
+    .podium-score {
+      font-family: var(--font-title);
+      font-size: 24px; font-weight: 700;
+    }
+
+    .gold .podium-score { color: var(--gold); text-shadow: 0 0 8px rgba(255,215,0,0.5); }
+    .silver .podium-score { color: var(--silver); }
+    .bronze .podium-score { color: var(--bronze); }
+
+    .podium-cat {
+      font-size: 9px; color: var(--text-dim);
+      letter-spacing: 1px; margin-top: 4px;
+      text-transform: uppercase;
+    }
+
+    .podium-stars { margin-top: 8px; font-size: 14px; }
+
+    .podium-bar {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      border-radius: 0 0 0 0;
+    }
+
+    .gold .podium-bar { height: 6px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+    .silver .podium-bar { height: 4px; background: linear-gradient(90deg, transparent, var(--silver), transparent); }
+    .bronze .podium-bar { height: 4px; background: linear-gradient(90deg, transparent, var(--bronze), transparent); }
+
+    /* Leaderboard Table */
+    .leaderboard-title {
+      font-family: var(--font-title);
+      font-size: 16px;
+      color: var(--green-primary);
+      text-shadow: 0 0 8px rgba(0,255,65,0.4);
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .leaderboard {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+
+    .lb-header {
+      display: grid;
+      grid-template-columns: 60px 1fr 120px 100px 120px 80px;
+      padding: 10px 16px;
+      background: rgba(0,10,0,0.8);
+      border-bottom: 1px solid var(--border);
+      font-size: 10px;
+      color: var(--text-dim);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .lb-row {
+      display: grid;
+      grid-template-columns: 60px 1fr 120px 100px 120px 80px;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(0,255,65,0.06);
+      align-items: center;
+      transition: all 0.2s;
+      cursor: default;
+    }
+
+    .lb-row:hover {
+      background: var(--green-glow);
+    }
+
+    .lb-row:last-child { border-bottom: none; }
+
+    .lb-rank {
+      font-family: var(--font-title);
+      font-size: 18px; font-weight: 700;
+    }
+
+    .lb-rank.r1 { color: var(--gold); text-shadow: 0 0 8px rgba(255,215,0,0.5); }
+    .lb-rank.r2 { color: var(--silver); }
+    .lb-rank.r3 { color: var(--bronze); }
+    .lb-rank.r4 { color: var(--green-primary); }
+
+    .lb-name {
+      font-size: 13px;
+    }
+
+    .lb-name-main {
+      color: var(--green-primary);
+      font-weight: bold;
+    }
+
+    .lb-name-sub {
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    .lb-category {
+      font-size: 10px;
+    }
+
+    .lb-cat-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 9px;
+      letter-spacing: 0.5px;
+    }
+
+    .cat-wifi { border: 1px solid rgba(0,255,255,0.3); color: var(--cyan); }
+    .cat-ble { border: 1px solid rgba(0,100,255,0.3); color: #6688ff; }
+    .cat-hacking { border: 1px solid rgba(255,0,64,0.3); color: var(--red); }
+    .cat-premium { border: 1px solid rgba(191,0,255,0.3); color: var(--purple); background: rgba(191,0,255,0.08); }
+    .cat-utility { border: 1px solid rgba(255,255,0,0.3); color: var(--yellow); }
+    .cat-ir { border: 1px solid rgba(255,102,0,0.3); color: var(--orange); }
+
+    .lb-rating {
+      font-family: var(--font-title);
+      font-size: 14px;
+    }
+
+    .lb-stars { font-size: 12px; }
+
+    .lb-score {
+      font-family: var(--font-title);
+      font-size: 16px; font-weight: 700;
+      color: var(--green-primary);
+      text-shadow: 0 0 6px rgba(0,255,65,0.4);
+    }
+
+    .lb-downloads {
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    /* Rating bar */
+    .rating-bar {
+      height: 4px;
+      background: rgba(0,255,65,0.1);
+      border-radius: 2px;
+      margin-top: 6px;
+      overflow: hidden;
+    }
+
+    .rating-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green-dark), var(--green-primary));
+      border-radius: 2px;
+      transition: width 1s ease;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 20px;
+      border-top: 1px solid var(--border);
+      margin-top: 20px;
+    }
+
+    .footer-text {
+      font-size: 10px;
+      color: var(--text-dim);
+      letter-spacing: 1px;
+    }
+
+    .footer-text .blink {
+      color: var(--green-primary);
+      animation: blink-g 1.5s step-end infinite;
+    }
+
+    @keyframes blink-g { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+    /* Animations */
+    .fade-in {
+      opacity: 0; transform: translateY(20px);
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    .fade-in-delay-1 { animation-delay: 0.1s; }
+    .fade-in-delay-2 { animation-delay: 0.2s; }
+    .fade-in-delay-3 { animation-delay: 0.3s; }
+    .fade-in-delay-4 { animation-delay: 0.4s; }
+
+    @keyframes fadeIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Counter animation */
+    .count-up {
+      display: inline-block;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .podium { flex-direction: column; align-items: center; }
+      .podium-place { width: 90% !important; min-height: auto !important; border-radius: 8px; }
+      .lb-header, .lb-row {
+        grid-template-columns: 50px 1fr 80px 80px;
+      }
+      .lb-header > :nth-child(5),
+      .lb-header > :nth-child(6),
+      .lb-row > :nth-child(5),
+      .lb-row > :nth-child(6) {
+        display: none;
+      }
+      .main-title { font-size: 24px; }
+      .stats-bar { gap: 12px; }
+      .stat-box { min-width: 110px; padding: 10px 16px; }
+    }
+
+    @media (max-width: 600px) {
+      .wrapper { padding: 10px; }
+      .header { padding: 20px 10px; }
+      .main-title { font-size: 18px; letter-spacing: 2px; }
+      .podium-place { width: 100% !important; }
+      .stat-box .val { font-size: 22px; }
+      .lb-header, .lb-row {
+        grid-template-columns: 40px 1fr 70px;
+      }
+      .lb-header > :nth-child(4),
+      .lb-row > :nth-child(4) {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="matrixCanvas"></canvas>
+  <div class="scanlines"></div>
+
+  <div class="wrapper">
+    <!-- Header -->
+    <header class="header fade-in">
+      <div class="header-skull">
+        <svg viewBox="0 0 64 64" width="54" height="54">
+          <path d="M32 4C18 4 8 16 8 28c0 8 4 15 10 19v9c0 2 2 4 4 4h20c2 0 4-2 4-4v-9c6-4 10-11 10-19C56 16 46 4 32 4z" fill="none" stroke="#00ff41" stroke-width="2.5"/>
+          <circle cx="24" cy="26" r="5" fill="#00ff41"/>
+          <circle cx="40" cy="26" r="5" fill="#00ff41"/>
+          <path d="M26 38h12" stroke="#00ff41" stroke-width="2" stroke-linecap="round"/>
+          <path d="M28 38v4M32 38v4M36 38v4" stroke="#00ff41" stroke-width="1.5"/>
+        </svg>
+      </div>
+      <h1 class="main-title" data-text="Mvps Hacking Mods">Mvps Hacking Mods</h1>
+      <p class="subtitle">TOP RATED // LEADERBOARD // MEJORES CALIFICACIONES</p>
+    </header>
+
+    <!-- Trophy -->
+    <div class="trophy-section fade-in fade-in-delay-1">
+      <div class="trophy-icon">&#127942;</div>
+      <div class="trophy-label">> MEJORES CALIFICACIONES DE TODOS LOS TIEMPOS</div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-bar fade-in fade-in-delay-2">
+      <div class="stat-box">
+        <div class="val" id="statTotal">24</div>
+        <div class="lbl">Firmwares</div>
+      </div>
+      <div class="stat-box">
+        <div class="val" id="statRated">24</div>
+        <div class="lbl">Calificados</div>
+      </div>
+      <div class="stat-box">
+        <div class="val" id="statAvg">4.5</div>
+        <div class="lbl">Prom. Rating</div>
+      </div>
+      <div class="stat-box">
+        <div class="val" id="statDownloads">48.7K</div>
+        <div class="lbl">Descargas</div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters fade-in fade-in-delay-3">
+      <button class="filter-btn active" onclick="filterLeaderboard('all')">TODOS</button>
+      <button class="filter-btn" onclick="filterLeaderboard('premium')">PREMIUM</button>
+      <button class="filter-btn" onclick="filterLeaderboard('wifi')">WiFi</button>
+      <button class="filter-btn" onclick="filterLeaderboard('ble')">BLE</button>
+      <button class="filter-btn" onclick="filterLeaderboard('hacking')">HACKING</button>
+      <button class="filter-btn" onclick="filterLeaderboard('utility')">UTILITY</button>
+    </div>
+
+    <!-- Podium (Top 3) -->
+    <div class="podium fade-in fade-in-delay-3" id="podium"></div>
+
+    <!-- Full Leaderboard -->
+    <div class="fade-in fade-in-delay-4">
+      <h2 class="leaderboard-title">> RANKING COMPLETO DE FIRMWARES</h2>
+      <div class="leaderboard" id="leaderboard"></div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-text">
+        [Mvps Hacking Mods v2.0] | ESP32-S3 LILYGO T-Embed | <span class="blink">SYSTEM ACTIVE</span>
+        <br>
+        <span id="footerTime">00:00:00</span> | Top Rated Leaderboard
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // ============================================
+    // FIRMWARE DATA WITH RATINGS
+    // ============================================
+    const FIRMWARES = [
+      { id: 1, name: "Marauder Pro", version: "v1.3.0", category: "hacking", rating: 9.8, stars: 5, downloads: 8420, desc: "WiFi & BLE hacking suite completa para pentesting", badge: "premium", tags: ["wifi","ble","hacking"] },
+      { id: 2, name: "Evil Portal", version: "v2.1.0", category: "hacking", rating: 9.6, stars: 5, downloads: 7250, desc: "Captive portal para auditorias de seguridad WiFi", badge: "popular", tags: ["wifi","hacking"] },
+      { id: 3, name: "Ghost ESP", version: "v1.0.5", category: "hacking", rating: 9.5, stars: 5, downloads: 6890, desc: "Framework avanzado de ataques WiFi/BLE", badge: "premium", tags: ["wifi","ble","hacking"] },
+      { id: 4, name: "WiFi Deauther", version: "v3.2.0", category: "wifi", rating: 9.4, stars: 5, downloads: 6540, desc: "Monitor y detector de paquetes deauth en redes WiFi", badge: "popular", tags: ["wifi","hacking"] },
+      { id: 5, name: "BLE Spammer Pro", version: "v2.0.0", category: "ble", rating: 9.2, stars: 5, downloads: 5120, desc: "Herramienta avanzada de testing Bluetooth Low Energy", badge: "premium", tags: ["ble","hacking"] },
+      { id: 6, name: "Packet Monitor", version: "v1.5.0", category: "wifi", rating: 9.1, stars: 4, downloads: 4350, desc: "Captura y analisis de paquetes WiFi en tiempo real", badge: "popular", tags: ["wifi","utility"] },
+      { id: 7, name: "IR Blaster Ultra", version: "v2.3.0", category: "utility", rating: 9.0, stars: 4, downloads: 3980, desc: "Control remoto IR universal con base de datos amplia", badge: "new", tags: ["ir","utility"] },
+      { id: 8, name: "BadUSB Framework", version: "v1.8.0", category: "hacking", rating: 8.9, stars: 4, downloads: 5670, desc: "Framework de inyeccion de teclado para pentesting", badge: "premium", tags: ["hacking","utility"] },
+      { id: 9, name: "NFC Toolkit", version: "v1.2.0", category: "utility", rating: 8.8, stars: 4, downloads: 3210, desc: "Lectura, escritura y emulacion de tags NFC", badge: "new", tags: ["utility"] },
+      { id: 10, name: "WiFi Scanner Pro", version: "v2.0.0", category: "wifi", rating: 8.7, stars: 4, downloads: 4120, desc: "Escaner avanzado de redes WiFi con analisis de canales", badge: "", tags: ["wifi","utility"] },
+      { id: 11, name: "GPS Spoofer", version: "v1.1.0", category: "hacking", rating: 8.6, stars: 4, downloads: 2890, desc: "Simulacion y testing de senales GPS", badge: "premium", tags: ["hacking"] },
+      { id: 12, name: "Flipper Connect", version: "v1.0.0", category: "utility", rating: 8.5, stars: 4, downloads: 3450, desc: "Bridge de comunicacion con Flipper Zero via BLE", badge: "new", tags: ["ble","utility"] },
+      { id: 13, name: "RFID Cloner", version: "v1.4.0", category: "hacking", rating: 8.4, stars: 4, downloads: 2670, desc: "Clonacion y emulacion de tarjetas RFID 125kHz", badge: "premium", tags: ["hacking","utility"] },
+      { id: 14, name: "Spectrum Analyzer", version: "v1.0.0", category: "wifi", rating: 8.3, stars: 4, downloads: 2340, desc: "Analizador de espectro WiFi 2.4GHz y 5GHz", badge: "", tags: ["wifi","utility"] },
+      { id: 15, name: "BLE Sniffer", version: "v1.3.0", category: "ble", rating: 8.2, stars: 4, downloads: 2100, desc: "Sniffer pasivo de comunicaciones BLE", badge: "", tags: ["ble","hacking"] },
+      { id: 16, name: "Wardriver Lite", version: "v1.0.0", category: "wifi", rating: 8.1, stars: 4, downloads: 1890, desc: "Mapeo de redes WiFi con coordenadas GPS", badge: "new", tags: ["wifi","hacking"] },
+      { id: 17, name: "Signal Jammer Det.", version: "v1.2.0", category: "utility", rating: 8.0, stars: 4, downloads: 1750, desc: "Detector de jammers e interferencias de senal", badge: "", tags: ["wifi","utility"] },
+      { id: 18, name: "AirTag Scanner", version: "v1.0.0", category: "ble", rating: 7.9, stars: 4, downloads: 2560, desc: "Detecta AirTags y trackers BLE cercanos", badge: "new", tags: ["ble","utility"] },
+      { id: 19, name: "Temp & Humidity", version: "v1.1.0", category: "utility", rating: 7.8, stars: 4, downloads: 1230, desc: "Monitor de temperatura y humedad con graficas", badge: "", tags: ["utility"] },
+      { id: 20, name: "LED Matrix Ctrl", version: "v2.0.0", category: "utility", rating: 7.6, stars: 4, downloads: 980, desc: "Control de matrices LED con animaciones custom", badge: "", tags: ["utility"] },
+      { id: 21, name: "Beacon Spammer", version: "v1.5.0", category: "ble", rating: 7.5, stars: 3, downloads: 3120, desc: "Generador de beacons BLE para testing", badge: "", tags: ["ble","hacking"] },
+      { id: 22, name: "OLED Snake Game", version: "v1.0.0", category: "utility", rating: 7.3, stars: 3, downloads: 1560, desc: "Juego clasico Snake para la pantalla T-Embed", badge: "", tags: ["utility"] },
+      { id: 23, name: "USB HID Tester", version: "v1.0.0", category: "utility", rating: 7.1, stars: 3, downloads: 890, desc: "Tester de dispositivos USB HID y payloads", badge: "", tags: ["utility","hacking"] },
+      { id: 24, name: "System Monitor", version: "v1.0.0", category: "utility", rating: 7.0, stars: 3, downloads: 760, desc: "Monitor de rendimiento del ESP32-S3 en tiempo real", badge: "", tags: ["utility"] }
+    ];
+
+    let currentFilter = 'all';
+
+    // ============================================
+    // RENDER FUNCTIONS
+    // ============================================
+
+    function getStarsHTML(stars, size = 14) {
+      let html = '';
+      for (let i = 0; i < 5; i++) {
+        html += i < stars ? '<span style="color: var(--gold);">&#9733;</span>' : '<span style="color: #333;">&#9733;</span>';
+      }
+      return html;
+    }
+
+    function getCategoryClass(cat) {
+      const map = { wifi: 'cat-wifi', ble: 'cat-ble', hacking: 'cat-hacking', premium: 'cat-premium', utility: 'cat-utility', ir: 'cat-ir' };
+      return map[cat] || 'cat-utility';
+    }
+
+    function formatDownloads(n) {
+      if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+      return n.toString();
+    }
+
+    function renderPodium(data) {
+      const podium = document.getElementById('podium');
+      if (data.length < 3) { podium.innerHTML = ''; return; }
+
+      const classes = ['silver', 'gold', 'bronze'];
+      const order = [1, 0, 2]; // silver, gold, bronze layout
+      const medals = ['&#129352;', '&#129351;', '&#129353;']; // Silver, Gold, Bronze emojis
+
+      podium.innerHTML = order.map(i => {
+        const fw = data[i];
+        return `
+          <div class="podium-place ${classes[i]}">
+            <div class="podium-rank">#${i + 1}</div>
+            <div class="podium-medal">${medals[i]}</div>
+            <div class="podium-name">${fw.name}</div>
+            <div class="podium-score">${fw.rating.toFixed(1)}</div>
+            <div class="podium-cat">${fw.category.toUpperCase()}</div>
+            <div class="podium-stars">${getStarsHTML(fw.stars)}</div>
+            <div style="font-size:10px;color:var(--text-dim);margin-top:6px;">${formatDownloads(fw.downloads)} descargas</div>
+            <div class="podium-bar"></div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderLeaderboard(data) {
+      const lb = document.getElementById('leaderboard');
+
+      let html = `
+        <div class="lb-header">
+          <div>RANK</div>
+          <div>FIRMWARE</div>
+          <div>CATEGORIA</div>
+          <div>RATING</div>
+          <div>DESCARGAS</div>
+          <div>SCORE</div>
+        </div>
+      `;
+
+      data.forEach((fw, idx) => {
+        const rankClass = idx < 3 ? `r${idx + 1}` : 'r4';
+        const rankSymbol = idx === 0 ? '&#129351;' : idx === 1 ? '&#129352;' : idx === 2 ? '&#129353;' : `#${idx + 1}`;
+
+        html += `
+          <div class="lb-row">
+            <div class="lb-rank ${rankClass}">${rankSymbol}</div>
+            <div class="lb-name">
+              <div class="lb-name-main">${fw.name} <span style="color:var(--text-dim);font-size:10px;">${fw.version}</span></div>
+              <div class="lb-name-sub">${fw.desc}</div>
+              <div class="rating-bar"><div class="rating-bar-fill" style="width: ${fw.rating * 10}%"></div></div>
+            </div>
+            <div class="lb-category">
+              <span class="lb-cat-badge ${getCategoryClass(fw.category)}">${fw.category.toUpperCase()}</span>
+              ${fw.badge === 'premium' ? '<span class="lb-cat-badge cat-premium" style="margin-left:4px;">PREMIUM</span>' : ''}
+              ${fw.badge === 'new' ? '<span class="lb-cat-badge cat-wifi" style="margin-left:4px;">NEW</span>' : ''}
+              ${fw.badge === 'popular' ? '<span class="lb-cat-badge" style="border:1px solid rgba(255,255,0,0.3);color:var(--yellow);margin-left:4px;">HOT</span>' : ''}
+            </div>
+            <div class="lb-rating">
+              <div class="lb-stars">${getStarsHTML(fw.stars)}</div>
+              <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">${fw.stars}/5 estrellas</div>
+            </div>
+            <div class="lb-downloads">${formatDownloads(fw.downloads)} downloads</div>
+            <div class="lb-score">${fw.rating.toFixed(1)}</div>
+          </div>
+        `;
+      });
+
+      lb.innerHTML = html;
+    }
+
+    function filterLeaderboard(cat) {
+      currentFilter = cat;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+
+      let filtered = [...FIRMWARES];
+      if (cat !== 'all') {
+        filtered = filtered.filter(fw => {
+          if (cat === 'premium') return fw.badge === 'premium';
+          return fw.category === cat || fw.tags.includes(cat);
+        });
+      }
+
+      filtered.sort((a, b) => b.rating - a.rating);
+      renderPodium(filtered);
+      renderLeaderboard(filtered);
+    }
+
+    // ============================================
+    // MATRIX RAIN
+    // ============================================
+
+    function initMatrix() {
+      const canvas = document.getElementById('matrixCanvas');
+      const ctx = canvas.getContext('2d');
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%^&*()_+-=[]{}|;:,.<>?/~`';
+      const fontSize = 14;
+      let columns = Math.floor(canvas.width / fontSize);
+      let drops = Array(columns).fill(1);
+
+      function draw() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#00ff41';
+        ctx.font = `${fontSize}px monospace`;
+
+        for (let i = 0; i < drops.length; i++) {
+          const text = chars[Math.floor(Math.random() * chars.length)];
+          ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+          if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+            drops[i] = 0;
+          }
+          drops[i]++;
+        }
+
+        columns = Math.floor(canvas.width / fontSize);
+        while (drops.length < columns) drops.push(1);
+      }
+
+      setInterval(draw, 45);
+    }
+
+    // ============================================
+    // CLOCK
+    // ============================================
+
+    function updateClock() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, '0');
+      const m = String(now.getMinutes()).padStart(2, '0');
+      const s = String(now.getSeconds()).padStart(2, '0');
+      const el = document.getElementById('footerTime');
+      if (el) el.textContent = `${h}:${m}:${s}`;
+    }
+
+    // ============================================
+    // INIT
+    // ============================================
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initMatrix();
+      setInterval(updateClock, 1000);
+      updateClock();
+
+      // Sort by rating and render
+      const sorted = [...FIRMWARES].sort((a, b) => b.rating - a.rating);
+      renderPodium(sorted);
+      renderLeaderboard(sorted);
+    });
+  </script>
+</body>
+</html>
