@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estudiante con Mejor Calificación</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      width: 100%;
+    }
+
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 40px;
+      animation: fadeInDown 0.8s ease-out;
+    }
+
+    .header h1 {
+      font-size: 3em;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .header p {
+      font-size: 1.2em;
+      opacity: 0.9;
+    }
+
+    .winner-card {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      margin-bottom: 30px;
+      animation: fadeInUp 1s ease-out;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .winner-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 8px;
+      background: linear-gradient(90deg, #FFD700, #FFA500, #FFD700);
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    .trophy-icon {
+      text-align: center;
+      font-size: 100px;
+      margin-bottom: 20px;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+
+    .winner-info {
+      text-align: center;
+    }
+
+    .winner-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #FFD700, #FFA500);
+      color: white;
+      padding: 10px 30px;
+      border-radius: 50px;
+      font-weight: bold;
+      font-size: 1.2em;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+    }
+
+    .winner-name {
+      font-size: 3em;
+      color: #333;
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+
+    .winner-grade {
+      font-size: 5em;
+      color: #667eea;
+      font-weight: bold;
+      margin: 20px 0;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .winner-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .detail-item {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .detail-label {
+      font-size: 0.9em;
+      color: #666;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .detail-value {
+      font-size: 1.5em;
+      color: #333;
+      font-weight: bold;
+    }
+
+    .students-table {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      animation: fadeInUp 1.2s ease-out;
+    }
+
+    .students-table h2 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 2em;
+      text-align: center;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+    }
+
+    th, td {
+      padding: 15px;
+      text-align: left;
+    }
+
+    th {
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.9em;
+      letter-spacing: 1px;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #eee;
+      transition: all 0.3s ease;
+    }
+
+    tbody tr:hover {
+      background: #f8f9fa;
+      transform: scale(1.02);
+    }
+
+    tbody tr.top-student {
+      background: linear-gradient(90deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.1));
+      font-weight: bold;
+    }
+
+    .rank {
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #667eea;
+    }
+
+    .rank.first {
+      color: #FFD700;
+      font-size: 1.5em;
+    }
+
+    .rank.second {
+      color: #C0C0C0;
+    }
+
+    .rank.third {
+      color: #CD7F32;
+    }
+
+    .grade-badge {
+      display: inline-block;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: bold;
+      color: white;
+    }
+
+    .grade-excellent {
+      background: linear-gradient(135deg, #11998e, #38ef7d);
+    }
+
+    .grade-good {
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+    }
+
+    .grade-average {
+      background: linear-gradient(135deg, #fa709a, #fee140);
+    }
+
+    .grade-poor {
+      background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      animation: fadeInUp 1.4s ease-out;
+    }
+
+    .stat-icon {
+      font-size: 3em;
+      margin-bottom: 10px;
+    }
+
+    .stat-value {
+      font-size: 2.5em;
+      font-weight: bold;
+      color: #667eea;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      color: #666;
+      font-size: 1em;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 2em;
+      }
+
+      .winner-name {
+        font-size: 2em;
+      }
+
+      .winner-grade {
+        font-size: 3em;
+      }
+
+      table {
+        font-size: 0.9em;
+      }
+
+      th, td {
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>🏆 Estudiante con Mejor Calificación 🏆</h1>
+      <p>Resultados del Período Académico 2026</p>
+    </div>
+
+    <!-- Winner Card -->
+    <div class="winner-card">
+      <div class="trophy-icon">🏆</div>
+      <div class="winner-info">
+        <div class="winner-badge">⭐ PRIMER LUGAR ⭐</div>
+        <div class="winner-name" id="winner-name">Cargando...</div>
+        <div class="winner-grade" id="winner-grade">--</div>
+        <div class="winner-details" id="winner-details">
+          <!-- Details will be populated by JavaScript -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="stats-container">
+      <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-value" id="avg-grade">--</div>
+        <div class="stat-label">Promedio General</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-value" id="total-students">--</div>
+        <div class="stat-label">Total Estudiantes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-value" id="passing-students">--</div>
+        <div class="stat-label">Aprobados</div>
+      </div>
+    </div>
+
+    <!-- All Students Table -->
+    <div class="students-table">
+      <h2>📋 Ranking Completo de Estudiantes</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Posición</th>
+            <th>Nombre</th>
+            <th>Materia</th>
+            <th>Calificación</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody id="students-tbody">
+          <!-- Table rows will be populated by JavaScript -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // Student data
+    const students = [
+      { name: "María González", subject: "Matemáticas Avanzadas", grade: 98.5, id: "2021001" },
+      { name: "Carlos Rodríguez", subject: "Física Cuántica", grade: 95.2, id: "2021002" },
+      { name: "Ana Martínez", subject: "Química Orgánica", grade: 94.8, id: "2021003" },
+      { name: "Luis Fernández", subject: "Programación", grade: 93.5, id: "2021004" },
+      { name: "Sofia López", subject: "Biología Molecular", grade: 92.7, id: "2021005" },
+      { name: "Diego Sánchez", subject: "Ingeniería de Software", grade: 91.3, id: "2021006" },
+      { name: "Laura Torres", subject: "Cálculo Diferencial", grade: 90.8, id: "2021007" },
+      { name: "Miguel Ramírez", subject: "Estadística", grade: 89.5, id: "2021008" },
+      { name: "Carmen Flores", subject: "Álgebra Lineal", grade: 88.9, id: "2021009" },
+      { name: "Roberto Castro", subject: "Base de Datos", grade: 87.6, id: "2021010" },
+      { name: "Patricia Morales", subject: "Redes de Computadoras", grade: 86.4, id: "2021011" },
+      { name: "Javier Ruiz", subject: "Inteligencia Artificial", grade: 85.2, id: "2021012" },
+      { name: "Elena Vargas", subject: "Sistemas Operativos", grade: 84.7, id: "2021013" },
+      { name: "Fernando Ortiz", subject: "Arquitectura de Computadoras", grade: 83.5, id: "2021014" },
+      { name: "Isabel Mendoza", subject: "Compiladores", grade: 82.1, id: "2021015" }
+    ];
+
+    // Sort students by grade (descending)
+    students.sort((a, b) => b.grade - a.grade);
+
+    // Get the top student
+    const topStudent = students[0];
+
+    // Display winner information
+    document.getElementById('winner-name').textContent = topStudent.name;
+    document.getElementById('winner-grade').textContent = topStudent.grade.toFixed(1);
+
+    // Display winner details
+    const detailsHTML = `
+      <div class="detail-item">
+        <div class="detail-label">Materia</div>
+        <div class="detail-value">${topStudent.subject}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">ID Estudiante</div>
+        <div class="detail-value">${topStudent.id}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Diferencia con 2do</div>
+        <div class="detail-value">+${(topStudent.grade - students[1].grade).toFixed(1)}</div>
+      </div>
+    `;
+    document.getElementById('winner-details').innerHTML = detailsHTML;
+
+    // Calculate statistics
+    const totalStudents = students.length;
+    const avgGrade = (students.reduce((sum, s) => sum + s.grade, 0) / totalStudents).toFixed(1);
+    const passingStudents = students.filter(s => s.grade >= 70).length;
+
+    document.getElementById('total-students').textContent = totalStudents;
+    document.getElementById('avg-grade').textContent = avgGrade;
+    document.getElementById('passing-students').textContent = passingStudents;
+
+    // Function to get grade class
+    function getGradeClass(grade) {
+      if (grade >= 90) return 'grade-excellent';
+      if (grade >= 80) return 'grade-good';
+      if (grade >= 70) return 'grade-average';
+      return 'grade-poor';
+    }
+
+    // Function to get rank class
+    function getRankClass(index) {
+      if (index === 0) return 'first';
+      if (index === 1) return 'second';
+      if (index === 2) return 'third';
+      return '';
+    }
+
+    // Function to get rank icon
+    function getRankIcon(index) {
+      if (index === 0) return '🥇';
+      if (index === 1) return '🥈';
+      if (index === 2) return '🥉';
+      return `${index + 1}`;
+    }
+
+    // Populate students table
+    const tbody = document.getElementById('students-tbody');
+    students.forEach((student, index) => {
+      const row = document.createElement('tr');
+      if (index === 0) row.classList.add('top-student');
+      
+      row.innerHTML = `
+        <td><span class="rank ${getRankClass(index)}">${getRankIcon(index)}</span></td>
+        <td><strong>${student.name}</strong></td>
+        <td>${student.subject}</td>
+        <td><span class="grade-badge ${getGradeClass(student.grade)}">${student.grade.toFixed(1)}</span></td>
+        <td>${student.grade >= 70 ? '✅ Aprobado' : '❌ Reprobado'}</td>
+      `;
+      
+      tbody.appendChild(row);
+    });
+
+    // Add confetti effect for the winner
+    function createConfetti() {
+      const colors = ['#FFD700', '#FFA500', '#FF6347', '#4169E1', '#32CD32'];
+      for (let i = 0; i < 50; i++) {
+        setTimeout(() => {
+          const confetti = document.createElement('div');
+          confetti.style.position = 'fixed';
+          confetti.style.width = '10px';
+          confetti.style.height = '10px';
+          confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+          confetti.style.left = Math.random() * window.innerWidth + 'px';
+          confetti.style.top = '-10px';
+          confetti.style.opacity = '1';
+          confetti.style.borderRadius = '50%';
+          confetti.style.pointerEvents = 'none';
+          confetti.style.zIndex = '9999';
+          document.body.appendChild(confetti);
+
+          const fall = confetti.animate([
+            { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
+            { transform: `translateY(${window.innerHeight + 10}px) rotate(${Math.random() * 360}deg)`, opacity: 0 }
+          ], {
+            duration: 3000 + Math.random() * 2000,
+            easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+          });
+
+          fall.onfinish = () => confetti.remove();
+        }, i * 30);
+      }
+    }
+
+    // Trigger confetti on load
+    window.addEventListener('load', () => {
+      setTimeout(createConfetti, 500);
+    });
+  </script>
+</body>
+</html>
